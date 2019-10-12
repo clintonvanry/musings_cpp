@@ -3,21 +3,49 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
+#include <list>
+
 
 using namespace  std;
+using vec_str = vector<string>;
+using list_str = list<string>;
+using vec_list = vector<list_str>;
 
-int main()
+void print_usage()
 {
-    cout << "Hello World!\n";
+	cout << "usage: csv_parser file " << endl;
+	cout << "where file is the path to a csv file" << endl;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+int main(int argc, const char* argv[])
+{
+    if(argc < 1)
+    {
+		print_usage();
+		return 1;
+    }
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+	ifstream fileStream;
+	fileStream.open(argv[1], ios_base::in);
+	if(!fileStream.is_open())
+	{
+		print_usage();
+		cout << "cannot open file " << argv[1] << endl;
+		return 1;
+	}
+	
+	vec_str lines;
+	for(string line; getline(fileStream, line);)
+	{
+		if(line.empty())
+		{
+			continue;
+		}
+		lines.push_back(move(line)); // as we are not using the string after this for loop use the move semantics
+	}
+
+	return 0;
+}
+
