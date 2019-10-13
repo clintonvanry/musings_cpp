@@ -9,6 +9,9 @@
 
 using namespace std;
 
+// The header body is either a single string, or is a series
+// of subitem separated by semicolons. A subitem can be a 
+// name=value pair.
 class header_body
 {
 	string body;
@@ -16,7 +19,70 @@ public:
 	header_body() = default;
 	header_body(string b) : body(std::move(b)) {}
 	string get_body() const { return body; }
+	vector<pair<string, string>> subitems();
 };
+
+// split the header body into subitems, a vector
+// of name=value pairs
+vector<pair<string, string>> header_body::subitems()
+{
+	vector<pair<string, string>> subitems;
+	if (body.find(';') == body.npos) return subitems;
+	size_t start = 0;
+	size_t end = start;
+	while (end != body.npos)
+	{
+		// skip over whitespace
+		while (start != body.length() && isspace(body[start]))
+		{
+			start++;
+		}
+
+		// if we are past the end, finish
+		if (start == body.length()) break;
+
+		string name = "";
+		string value = "";
+		size_t eq = body.find('=', start);
+		end = body.find(';', start);
+
+		if (eq == body.npos)
+		{
+			// no =, no value
+			if (end == body.npos) name = body.substr(start);
+			else name = body.substr(start, end - start);
+		}
+		else
+		{
+			// there is an = so the item is a name=value pair
+			if (end == body.npos)
+			{
+				name = body.substr(start, eq - start);
+				value = body.substr(eq + 1);
+			}
+			else
+			{
+				// make sure that eq refers to this subitem
+				if (eq < end)
+				{
+					name = body.substr(start, eq - start);
+					value = body.substr(eq + 1, end - eq - 1);
+				}
+				else
+				{
+					// eq refers to another subitem, so
+					// this one does not have a value
+					name = body.substr(start, end - start);
+				}
+			}
+		}
+		subitems.push_back(make_pair(name, value));
+		start = end + 1;
+	}
+
+	return subitems;
+}
+
 
 // RFC 5322
 // headers are one per line in form name : value
@@ -140,7 +206,7 @@ int main(int argc, char* argv[])
 
 	cout << eml.get_headers();
 	
-	/*
+	
 	for (auto header : eml)
 	{
 		cout << header.first << " : ";
@@ -163,7 +229,7 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
-	*/
+	
 	
 	
 	cout << "\n";
