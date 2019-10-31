@@ -20,9 +20,15 @@ public:
 	Book() = default;
 	Book(const string& author, const string& title);
 
+	// disallow assignment and pass by value
+	Book(const Book& src) = delete;
+	Book& operator=(const Book& rhs) = delete;
+
+	// explicit default move constructor and assignment
+	Book(Book&& src) = default;
+	Book& operator=(Book&& rhs) = default;
+	
 	// methods
-	
-	
 	void read(ifstream& inStream);
 	void write(ofstream& outStream) const;
 

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "Book.h"
+#include "Customer.h"
 
 using namespace  std;
 
@@ -15,6 +16,11 @@ int main()
 
 	cout << b << endl;
 
+	Customer c{ "Billy", "Bob" };
+	c.borrowBook(66);
+	c.reserveBook(77);
+	cout << c << endl;
+	
 	return 0;
 }
 
