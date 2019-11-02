@@ -48,7 +48,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& outStream,const Customer& customer);
 
 private:
-	int m_customerId;
+	int m_customerId = 0;
 	std::string m_name;
 	std::string m_address;
 	std::set<int> m_loanSet, m_reservationSet;

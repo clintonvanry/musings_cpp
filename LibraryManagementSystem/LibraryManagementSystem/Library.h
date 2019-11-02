@@ -7,7 +7,7 @@
 class Library
 {
 public:
-	Library() = default;
+	Library();
 
 	// disallow assignment and pass by value
 	Library(const Library& src) = delete;
@@ -33,7 +33,7 @@ private:
 
 	void addBook();
 	void deleteBook();
-	void listBooks();
+	static void listBooks();
 	void addCustomer();
 	void deleteCustomer();
 	void listCustomers();
@@ -41,6 +41,9 @@ private:
 	void reserveBook();
 	void returnBook();
 
+	void load();
+	void save();
+	
 	static string s_binaryPath;
 };
 
