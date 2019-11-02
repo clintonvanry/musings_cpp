@@ -84,7 +84,7 @@ Library::Library()
 	save();
 }
 
-bool Library::lookupBook(const std::string& author, const std::string& title, Book* bookPtr)
+bool Library::lookupBook(const std::string& author, const std::string& title, Book* bookPtr) const
 {
 	for(auto& entry : s_bookMap) // investigate const pair<int,Book>&
 	{

@@ -28,7 +28,7 @@ public:
 	
 	
 private:
-	bool lookupBook(const std::string& author, const std::string& title, Book* bookPtr = nullptr);
+	bool lookupBook(const std::string& author, const std::string& title, Book* bookPtr = nullptr) const;
 	bool lookupCustomer(const std::string& name, const std::string& address, Customer* customerPtr = nullptr);
 
 	void addBook();
