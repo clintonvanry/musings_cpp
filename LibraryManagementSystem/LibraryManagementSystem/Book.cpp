@@ -1,5 +1,6 @@
 #include <fstream>
 #include "Book.h"
+#include "Library.h"
 
 int Book::MaxBookId = 0;
 
@@ -89,7 +90,7 @@ ostream& operator<<(ostream& outStream, const Book& book)
 	if (book.m_bookIsBorrowed) 
 	{
 		outStream << endl << "  Borrowed by: "
-			//<< Library::s_customerMap[book.m_customerId].name()
+			<< Library::s_customerMap[book.m_customerId].name()
 			<< ".";
 	}
 
@@ -100,8 +101,7 @@ ostream& operator<<(ostream& outStream, const Book& book)
 		bool first = true;
 		for (int customerId : book.m_reservationList) 
 		{
-			outStream << (first ? "" : ",") << "";
-			//	<< Library::s_customerMap[customerId].name();
+			outStream << (first ? "" : ",") << ""	<< Library::s_customerMap[customerId].name();
 			first = false;
 		}
 

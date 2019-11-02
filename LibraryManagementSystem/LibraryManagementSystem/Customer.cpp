@@ -2,6 +2,7 @@
 #include <utility>
 #include <string>
 #include <fstream>
+#include "Library.h"
 
 using namespace  std;
 
@@ -74,8 +75,7 @@ std::ostream& operator<<(std::ostream& outStream, const Customer& customer)
 
 		bool first = true;
 		for (int bookId : customer.m_loanSet) {
-			outStream << (first ? "" : ",") << endl;
-				//<< Library::s_bookMap[bookId].author();
+			outStream << (first ? "" : ",") <<  Library::s_bookMap[bookId].Author();
 			first = false;
 		}
 	}
@@ -85,8 +85,7 @@ std::ostream& operator<<(std::ostream& outStream, const Customer& customer)
 
 		bool first = true;
 		for (int bookId : customer.m_reservationSet) {
-			outStream << (first ? "" : ",") << endl;
-				//<< Library::s_bookMap[bookId].title();
+			outStream << (first ? "" : ",") <<  Library::s_bookMap[bookId].Title();
 			first = false;
 		}
 	}
