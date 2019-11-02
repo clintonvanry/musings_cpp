@@ -8,34 +8,34 @@ using namespace  std;
 
 int Customer::MaxCustomerId;
 
-Customer::Customer(string name, string address): m_name(std::move(name)), m_address(std::move(address)), m_customerId(++MaxCustomerId)
+Customer::Customer(string name, string address):  m_customerId(++MaxCustomerId), m_name(std::move(name)), m_address(std::move(address))
 {
 	
 }
 
 void Customer::read(std::ifstream& inStream)
 {
-	inStream.read((char*)&m_customerId, sizeof m_customerId);
+	inStream.read(reinterpret_cast<char*>(&m_customerId), sizeof m_customerId);
 	getline(inStream, m_name);
 	getline(inStream, m_address);
 
 	{ int borrowSetSize;
-	inStream.read((char*)&borrowSetSize, sizeof borrowSetSize);
+	inStream.read(reinterpret_cast<char*>(&borrowSetSize), sizeof borrowSetSize);
 
 	for (int count = 0; count < borrowSetSize; ++count) {
 		int bookId;
-		inStream.read((char*)&bookId, sizeof bookId);
+		inStream.read(reinterpret_cast<char*>(&bookId), sizeof bookId);
 		m_loanSet.insert(bookId);
 	}
 	}
 
 	int reserveListSize;
-	inStream.read((char*)&reserveListSize,sizeof reserveListSize);
+	inStream.read(reinterpret_cast<char*>(&reserveListSize),sizeof reserveListSize);
 
 	for (int count = 0; count < reserveListSize; ++count) 
 	{
 		int bookId;
-		inStream.read((char*)&bookId, sizeof bookId);
+		inStream.read(reinterpret_cast<char*>(&bookId), sizeof bookId);
 		m_loanSet.insert(bookId);
 	}
 	
