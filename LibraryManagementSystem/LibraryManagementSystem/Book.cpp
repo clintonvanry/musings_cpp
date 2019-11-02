@@ -17,18 +17,18 @@ void Book::read(ifstream& inStream)
 	inStream.read((char*)&m_bookIsBorrowed, sizeof m_bookIsBorrowed);
 	inStream.read((char*)&m_customerId, sizeof m_customerId);
 
+	
+	int reserveListSize;
+
+	inStream.read((char*)&reserveListSize,sizeof reserveListSize);
+
+	for (int count = 0; count < reserveListSize; ++count) 
 	{
-		int reserveListSize;
-
-		inStream.read((char*)&reserveListSize,sizeof reserveListSize);
-
-		for (int count = 0; count < reserveListSize; ++count) 
-		{
-			int customerId;
-			inStream.read((char*)&customerId, sizeof customerId);
-			m_reservationList.push_back(customerId);
-		}
+		int customerId;
+		inStream.read((char*)&customerId, sizeof customerId);
+		m_reservationList.push_back(customerId);
 	}
+	
 	
 }
 
@@ -43,17 +43,17 @@ void Book::write(ofstream& outStream) const
 	outStream.write((char*)&m_bookIsBorrowed, sizeof m_bookIsBorrowed);
 	outStream.write((char*)&m_customerId, sizeof m_customerId);
 
+	
+	int reserveListSize = m_reservationList.size();
+
+	outStream.write((char*)&reserveListSize,
+	sizeof reserveListSize);
+
+	for (int customerId : m_reservationList) 
 	{
-		int reserveListSize = m_reservationList.size();
-
-		outStream.write((char*)&reserveListSize,
-		sizeof reserveListSize);
-
-		for (int customerId : m_reservationList) 
-		{
-			outStream.write((char*)&customerId, sizeof customerId);
-		}
+		outStream.write((char*)&customerId, sizeof customerId);
 	}
+
 	
 }
 
