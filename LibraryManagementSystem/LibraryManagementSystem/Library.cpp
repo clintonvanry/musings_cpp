@@ -76,7 +76,11 @@ Library::Library()
 		case 0:
 			quit = true;
 			break;
-		}
+		default:
+			quit = true;
+			break;
+		};
+		
 
 		cout << endl;
 	}
