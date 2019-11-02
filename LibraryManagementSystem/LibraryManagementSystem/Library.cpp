@@ -106,7 +106,7 @@ bool Library::lookupBook(const std::string& author, const std::string& title, Bo
 	return false;
 }
 
-bool Library::lookupCustomer(const std::string& name, const std::string& address, Customer* customerPtr)
+bool Library::lookupCustomer(const std::string& name, const std::string& address, Customer* customerPtr) const
 {
 	for (auto& entry : s_customerMap) {
 		auto& customer = entry.second;
