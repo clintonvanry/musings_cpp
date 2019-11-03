@@ -8,6 +8,7 @@ class Library
 {
 public:
 	Library();
+	virtual ~Library() = default;
 
 	// disallow assignment and pass by value
 	Library(const Library& src) = delete;

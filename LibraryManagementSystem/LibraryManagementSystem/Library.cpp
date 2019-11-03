@@ -30,10 +30,10 @@ Library::Library()
 			<< ": ";
 
 		string text;
-		cin >> text;
+		cin >> text; // should i use getline so i dont have the space issue?
 		cout << endl;
 
-		int choice = -1;
+		auto choice = -1;
 		sscanf_s(text.c_str(), "%i", &choice);
 
 		switch (choice) {
@@ -108,10 +108,12 @@ bool Library::lookupBook(const std::string& author, const std::string& title, Bo
 
 bool Library::lookupCustomer(const std::string& name, const std::string& address, Customer* customerPtr) const
 {
-	for (auto& entry : s_customerMap) {
+	for (auto& entry : s_customerMap) 
+	{
 		auto& customer = entry.second;
 
-		if ((customer.name() == name) &&(customer.address() == address)) 
+		if ((customer.name() == name) 
+		&&(customer.address() == address)) 
 		{
 			if (customerPtr != nullptr) 
 			{
@@ -141,12 +143,13 @@ void Library::addBook()
 		return;
 	}
 
-	cout << "Title: ";
+	cout << "Title: "; // this is weird
 	cin >> title;
 
 	Book book(author, title);
-	s_bookMap[book.bookId()] = std::move(book);
 	cout << endl << "Added: " << book << endl;
+	s_bookMap[book.bookId()] = std::move(book);
+	
 }
 
 void Library::deleteBook()
@@ -203,8 +206,9 @@ void Library::addCustomer()
 	cout << "Address: ";
 	cin >> address;
 
-	if (lookupCustomer(name, address)) {
-		cout << endl << "A customer with name " << name 	<< " and address " << address << " already exists."			<< endl;
+	if (lookupCustomer(name, address)) 
+	{
+		cout << endl << "A customer with name " << name	<< " and address " << address << " already exists."	<< endl;
 		return;
 	}
 
@@ -275,7 +279,7 @@ void Library::borrowBook()
 	Book book;
 	if (!lookupBook(author, title, &book)) 
 	{
-		cout << endl << "There is no book \"" << title << "\" by "			<< " author " << author << "." << endl;
+		cout << endl << "There is no book \"" << title << "\" by " << " author " << author << "." << endl;
 		return;
 	}
 
@@ -290,14 +294,13 @@ void Library::borrowBook()
 	cin >> name;
 
 	string address;
-	cout << "Adddress: ";
+	cout << "Address: ";
 	cin >> address;
 
 	Customer customer;
 	if (!lookupCustomer(name, address, &customer)) 
 	{
-		cout << endl << "There is no customer with name " << name
-			<< " and address " << address << "." << endl;
+		cout << endl << "There is no customer with name " << name << " and address " << address << "." << endl;
 		return;
 	}
 
@@ -397,7 +400,8 @@ void Library::returnBook()
 
 	auto& reservationList = book.reservationList();
 
-	if (!reservationList.empty()) {
+	if (!reservationList.empty()) 
+	{
 		auto newCustomerId = reservationList.front();
 		reservationList.erase(reservationList.begin());
 		book.borrowBook(newCustomerId);
@@ -405,8 +409,9 @@ void Library::returnBook()
 		auto newCustomer = std::move( s_customerMap[newCustomerId]);
 		newCustomer.borrowBook(book.bookId());
 
-		s_customerMap[newCustomerId] = std::move(newCustomer);
 		cout << endl << "Borrowed by " << newCustomer.name() << endl;
+		s_customerMap[newCustomerId] = std::move(newCustomer);
+		
 	}
 
 	s_bookMap[book.bookId()] = std::move(book);
@@ -419,9 +424,9 @@ void Library::load()
 	if (inStream) 
 	{
 		int numberOfBooks;
-		inStream.read((char*)&numberOfBooks, sizeof numberOfBooks);
+		inStream.read(reinterpret_cast<char*>(&numberOfBooks), sizeof numberOfBooks);
 
-		for (int count = 0; count < numberOfBooks; ++count) 
+		for (auto count = 0; count < numberOfBooks; ++count) 
 		{
 			Book book;
 			book.read(inStream);
@@ -431,9 +436,9 @@ void Library::load()
 		}
 
 		int numberOfCustomers;
-		inStream.read((char*)&numberOfCustomers,sizeof numberOfCustomers);
+		inStream.read(reinterpret_cast<char*>(&numberOfCustomers),sizeof numberOfCustomers);
 
-		for (int count = 0; count < numberOfCustomers; ++count) 
+		for (auto count = 0; count < numberOfCustomers; ++count) 
 		{
 			Customer customer;
 			customer.read(inStream);
@@ -450,18 +455,18 @@ void Library::save()
 	if (outStream) 
 	{
 		int numberOfBooks = s_bookMap.size();
-		outStream.write((char*)&numberOfBooks, sizeof numberOfBooks);
+		outStream.write(reinterpret_cast<char*>(&numberOfBooks), sizeof numberOfBooks);
 
-		for (const pair<const int, Book>& entry : s_bookMap) 
+		for (const auto& entry : s_bookMap) 
 		{
 			const auto& book = entry.second;
 			book.write(outStream);
 		}
 
 		int numberOfCustomers = s_customerMap.size();
-		outStream.write((char*)&numberOfCustomers,sizeof numberOfCustomers);
+		outStream.write(reinterpret_cast<char*>(&numberOfCustomers),sizeof numberOfCustomers);
 
-		for (const pair<const int, Customer>& entry : s_customerMap) 
+		for (const auto& entry : s_customerMap) 
 		{
 			const auto& customer = entry.second;
 			customer.write(outStream);
