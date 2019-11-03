@@ -85,7 +85,7 @@ void Book::returnBook()
 
 ostream& operator<<(ostream& outStream, const Book& book)
 {
-	outStream << "\"" << book.m_title << "\" by " << book.m_author;
+	outStream <<"id: " << book.bookId() << " \"" << book.m_title << "\" by " << book.m_author;
 
 	if (book.m_bookIsBorrowed) 
 	{

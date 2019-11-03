@@ -41,9 +41,11 @@ private:
 	void borrowBook();
 	void reserveBook();
 	void returnBook();
-
+	
 	void load();
 	void save();
+
+	void getBookDetails(std::string& author, std::string& title);
 	
 	static string s_binaryPath;
 };

@@ -31,6 +31,8 @@ Library::Library()
 
 		string text;
 		cin >> text; // should i use getline so i dont have the space issue?
+		cin.clear();
+		cin.ignore(1, '\n');
 		cout << endl;
 
 		auto choice = -1;
@@ -129,22 +131,17 @@ bool Library::lookupCustomer(const std::string& name, const std::string& address
 
 void Library::addBook()
 {
-	string author;
-	cout << "Author: ";
-	cin >> author;
+	string author, title;
+	getBookDetails(author, title);
 
-	string title;
-	cout << "Title: ";
-	cin >> title;
-
-	if (lookupBook(author, title)) 
+	auto bookFromLibrary = make_unique<Book>();
+	if (lookupBook(author, title, bookFromLibrary.get()))
 	{
-		cout << endl << "The book \"" << title << "\" by "	<< author << " already exists." << endl;
+		cout << endl << *bookFromLibrary << endl;
+		bookFromLibrary.reset();
 		return;
 	}
-
-	cout << "Title: "; // this is weird
-	cin >> title;
+	bookFromLibrary.reset();
 
 	Book book(author, title);
 	cout << endl << "Added: " << book << endl;
@@ -152,15 +149,20 @@ void Library::addBook()
 	
 }
 
+void Library::getBookDetails(std::string& author, std::string& title)
+{
+	cout << "Author: ";
+	getline(cin, author);
+	
+	cout << "Title: ";
+	getline(cin, title);	
+}
+
 void Library::deleteBook()
 {
-	string author;
-	cout << "Author: ";
-	cin >> author;
+	string author, title;
+	getBookDetails(author, title);
 
-	string title;
-	cout << "Title: ";
-	cin >> title;
 
 	Book book;
 	if (!lookupBook(author, title, &book)) 
@@ -268,13 +270,9 @@ void Library::listCustomers()
 
 void Library::borrowBook()
 {
-	string author;
-	cout << "Author: ";
-	cin >> author;
+	string author, title;
+	getBookDetails(author, title);
 
-	string title;
-	cout << "Title: ";
-	cin >> title;
 
 	Book book;
 	if (!lookupBook(author, title, &book)) 
@@ -316,13 +314,9 @@ void Library::borrowBook()
 
 void Library::reserveBook()
 {
-	string author;
-	cout << "Author: ";
-	cin >> author;
+	string author, title;
+	getBookDetails(author, title);
 
-	string title;
-	cout << "Title: ";
-	cin >> title;
 
 	Book book;
 	if (!lookupBook(author, title, &book)) 
@@ -370,13 +364,9 @@ void Library::reserveBook()
 
 void Library::returnBook()
 {
-	string author;
-	cout << "Author: ";
-	cin >> author;
+	string author, title;
+	getBookDetails(author, title);
 
-	string title;
-	cout << "Title: ";
-	cin >> title;
 
 	Book book;
 	if (!lookupBook(author, title, &book)) 
@@ -473,3 +463,5 @@ void Library::save()
 		}
 	}
 }
+
+
