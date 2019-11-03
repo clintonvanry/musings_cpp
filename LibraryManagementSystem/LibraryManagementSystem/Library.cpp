@@ -95,7 +95,8 @@ bool Library::lookupBook(const std::string& author, const std::string& title, Bo
 	for(auto& entry : s_bookMap) 
 	{
 		auto& book = entry.second;
-		if(book.Author() == author)
+		if(book.Author() == author 
+		&& book.Title() == title)
 		{
 			if(bookPtr != nullptr)
 			{

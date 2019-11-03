@@ -85,11 +85,11 @@ void Book::returnBook()
 
 ostream& operator<<(ostream& outStream, const Book& book)
 {
-	outStream <<"id: " << book.bookId() << " \"" << book.m_title << "\" by " << book.m_author;
+	outStream <<"book id: " << book.bookId() << endl << " \"" << book.m_title << "\" by " << book.m_author;
 
 	if (book.m_bookIsBorrowed) 
 	{
-		outStream << endl << "  Borrowed by: "	<< Library::s_customerMap[book.m_customerId].name()		<< ".";
+		outStream << endl << "  Borrowed by: " << Library::s_customerMap[book.m_customerId].name()	<< ".";
 	}
 
 	if (!book.m_reservationList.empty()) 
