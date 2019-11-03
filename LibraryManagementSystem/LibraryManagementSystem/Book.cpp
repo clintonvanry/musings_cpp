@@ -1,32 +1,33 @@
 #include <fstream>
+#include <utility>
 #include "Book.h"
 #include "Library.h"
 
 int Book::MaxBookId = 0;
 
-Book::Book(const string& author, const string& title): m_author(author), m_title(title), m_bookId(++Book::MaxBookId)
+Book::Book(string author, string title): m_author(std::move(author)), m_title(std::move(title)), m_bookId(++Book::MaxBookId)
 {
 }
 
 void Book::read(ifstream& inStream)
 {
-	inStream.read((char*)&m_bookId, sizeof m_bookId);
+	inStream.read(reinterpret_cast<char*>(&m_bookId), sizeof m_bookId);
 
 	getline(inStream, m_author);
 	getline(inStream, m_title);
 
-	inStream.read((char*)&m_bookIsBorrowed, sizeof m_bookIsBorrowed);
-	inStream.read((char*)&m_customerId, sizeof m_customerId);
+	inStream.read(reinterpret_cast<char*>(&m_bookIsBorrowed), sizeof m_bookIsBorrowed);
+	inStream.read(reinterpret_cast<char*>(&m_customerId), sizeof m_customerId);
 
 	
-	int reserveListSize;
+	auto reserveListSize = 0;
 
-	inStream.read((char*)&reserveListSize,sizeof reserveListSize);
+	inStream.read(reinterpret_cast<char*>(&reserveListSize),sizeof reserveListSize);
 
-	for (int count = 0; count < reserveListSize; ++count) 
+	for (auto count = 0; count < reserveListSize; ++count) 
 	{
-		int customerId;
-		inStream.read((char*)&customerId, sizeof customerId);
+		auto customerId = 0;
+		inStream.read(reinterpret_cast<char*>(&customerId), sizeof customerId);
 		m_reservationList.push_back(customerId);
 	}
 	
@@ -36,23 +37,22 @@ void Book::read(ifstream& inStream)
 void Book::write(ofstream& outStream) const
 {
 
-	outStream.write((char*)&m_bookId, sizeof m_bookId);
+	outStream.write(reinterpret_cast<char*>(const_cast<int*>(&m_bookId)), sizeof m_bookId);
 
 	outStream << m_author << endl;
 	outStream << m_title << endl;
 
-	outStream.write((char*)&m_bookIsBorrowed, sizeof m_bookIsBorrowed);
-	outStream.write((char*)&m_customerId, sizeof m_customerId);
+	outStream.write(reinterpret_cast<char*>(const_cast<bool*>(&m_bookIsBorrowed)), sizeof m_bookIsBorrowed);
+	outStream.write(reinterpret_cast<char*>(const_cast<int*>(&m_customerId)), sizeof m_customerId);
 
 	
-	int reserveListSize = m_reservationList.size();
+	auto reserveListSize = m_reservationList.size();
 
-	outStream.write((char*)&reserveListSize,
-	sizeof reserveListSize);
+	outStream.write(reinterpret_cast<char*>(const_cast<unsigned*>(&reserveListSize)),sizeof reserveListSize);
 
-	for (int customerId : m_reservationList) 
+	for (auto customerId : m_reservationList) 
 	{
-		outStream.write((char*)&customerId, sizeof customerId);
+		outStream.write(reinterpret_cast<char*>(const_cast<int*>(&customerId)), sizeof customerId);
 	}
 
 	
@@ -89,17 +89,15 @@ ostream& operator<<(ostream& outStream, const Book& book)
 
 	if (book.m_bookIsBorrowed) 
 	{
-		outStream << endl << "  Borrowed by: "
-			<< Library::s_customerMap[book.m_customerId].name()
-			<< ".";
+		outStream << endl << "  Borrowed by: "	<< Library::s_customerMap[book.m_customerId].name()		<< ".";
 	}
 
 	if (!book.m_reservationList.empty()) 
 	{
 		outStream << endl << "  Reserved by: ";
 
-		bool first = true;
-		for (int customerId : book.m_reservationList) 
+		auto first = true;
+		for (auto customerId : book.m_reservationList) 
 		{
 			outStream << (first ? "" : ",") << ""	<< Library::s_customerMap[customerId].name();
 			first = false;
