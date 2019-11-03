@@ -18,7 +18,8 @@ public:
 	
 	// constructor
 	Book() = default;
-	Book(const string& author, const string& title);
+	virtual ~Book() = default;
+	Book(string author, string title);
 
 	// disallow assignment and pass by value
 	Book(const Book& src) = delete;
