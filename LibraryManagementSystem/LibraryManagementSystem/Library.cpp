@@ -215,12 +215,15 @@ void Library::addCustomer()
 	string name, address;
 	getCustomerDetails(name, address);
 
-	if (lookupCustomer(name, address)) 
+	auto customerFromLibrary = make_unique<Customer>();
+	if (lookupCustomer(name, address, customerFromLibrary.get())) 
 	{
 		cout << endl << "A customer with name " << name	<< " and address " << address << " already exists."	<< endl;
+		customerFromLibrary.reset();
 		return;
 	}
-
+	customerFromLibrary.reset();
+	
 	Customer customer(name, address);
 	s_customerMap[customer.id()] = std::move(customer);
 	cout << endl << "Added." << endl;
