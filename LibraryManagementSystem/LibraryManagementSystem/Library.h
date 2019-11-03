@@ -46,6 +46,7 @@ private:
 	void save();
 
 	void getBookDetails(std::string& author, std::string& title);
+	void getCustomerDetails(std::string& name, std::string& address);
 	
 	static string s_binaryPath;
 };

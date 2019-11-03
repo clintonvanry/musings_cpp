@@ -159,28 +159,39 @@ void Library::getBookDetails(std::string& author, std::string& title)
 	getline(cin, title);	
 }
 
+void Library::getCustomerDetails(std::string& name, std::string& address)
+{
+	cout << "Name: ";
+	getline(cin, name);
+
+	cout << "Address: ";
+	getline(cin, address);
+}
+
 void Library::deleteBook()
 {
 	string author, title;
 	getBookDetails(author, title);
 
 
-	Book book;
-	if (!lookupBook(author, title, &book)) 
+	auto bookFromLibrary = make_unique<Book>();
+	if (!lookupBook(author, title, bookFromLibrary.get()))
 	{
 		cout << endl << "The book \"" << title << "\" by "	<< author << " does not exist." << endl;
+		bookFromLibrary.reset();
 		return;
 	}
 
 	for (auto& entry : s_customerMap) 
 	{
 		auto& customer = entry.second;
-		customer.returnBook(book.bookId());
-		customer.unreserveBook(book.bookId());
+		customer.returnBook(bookFromLibrary->bookId());
+		customer.unreserveBook(bookFromLibrary->bookId());
 		s_customerMap[customer.id()] = std::move(customer);
 	}
 
-	s_bookMap.erase(book.bookId());
+	s_bookMap.erase(bookFromLibrary->bookId());
+	bookFromLibrary.reset();
 	cout << endl << "Deleted." << endl;
 }
 
@@ -201,13 +212,8 @@ void Library::listBooks()
 
 void Library::addCustomer()
 {
-	string name;
-	cout << "Name: ";
-	cin >> name;
-
-	string address;
-	cout << "Address: ";
-	cin >> address;
+	string name, address;
+	getCustomerDetails(name, address);
 
 	if (lookupCustomer(name, address)) 
 	{
@@ -222,13 +228,8 @@ void Library::addCustomer()
 
 void Library::deleteCustomer()
 {
-	string name;
-	cout << "Name: ";
-	cin >> name;
-
-	string address;
-	cout << "Address: ";
-	cin >> address;
+	string name, address;
+	getCustomerDetails(name, address);
 
 	Customer customer;
 	if (!lookupCustomer(name, address, &customer)) 
@@ -288,13 +289,8 @@ void Library::borrowBook()
 		return;
 	}
 
-	string name;
-	cout << "Customer name: ";
-	cin >> name;
-
-	string address;
-	cout << "Address: ";
-	cin >> address;
+	string name, address;
+	getCustomerDetails(name, address);
 
 	Customer customer;
 	if (!lookupCustomer(name, address, &customer)) 
@@ -332,13 +328,8 @@ void Library::reserveBook()
 		return;
 	}
 
-	string name;
-	cout << "Customer name: ";
-	cin >> name;
-
-	string address;
-	cout << "Address: ";
-	cin >> address;
+	string name, address;
+	getCustomerDetails(name, address);
 
 	Customer customer;
 	if (!lookupCustomer(name, address, &customer)) 
@@ -445,7 +436,7 @@ void Library::save()
 	ofstream outStream(s_binaryPath);
 	if (outStream) 
 	{
-		int numberOfBooks = s_bookMap.size();
+		auto numberOfBooks = s_bookMap.size();
 		outStream.write(reinterpret_cast<char*>(&numberOfBooks), sizeof numberOfBooks);
 
 		for (const auto& entry : s_bookMap) 
@@ -454,7 +445,7 @@ void Library::save()
 			book.write(outStream);
 		}
 
-		int numberOfCustomers = s_customerMap.size();
+		auto numberOfCustomers = s_customerMap.size();
 		outStream.write(reinterpret_cast<char*>(&numberOfCustomers),sizeof numberOfCustomers);
 
 		for (const auto& entry : s_customerMap) 
