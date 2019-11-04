@@ -1,6 +1,7 @@
 #pragma once
 #include <set>
 #include <map>
+#include <string_view>
 #include "Book.h"
 #include "Customer.h"
 
@@ -29,7 +30,7 @@ public:
 	
 	
 private:
-	bool lookupBook(const std::string& author, const std::string& title, Book* bookPtr = nullptr) const;
+	bool lookupBook(std::string_view author, std::string_view title, Book* bookPtr = nullptr) const;
 	bool lookupCustomer(const std::string& name, const std::string& address, Customer* customerPtr = nullptr) const;
 
 	void addBook();

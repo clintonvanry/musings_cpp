@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <string_view>
 
 using namespace std;
 
@@ -90,7 +91,7 @@ Library::Library()
 	save();
 }
 
-bool Library::lookupBook(const std::string& author, const std::string& title, Book* bookPtr) const
+bool Library::lookupBook(std::string_view author, std::string_view title, Book* bookPtr) const
 {
 	for(auto& entry : s_bookMap) 
 	{
