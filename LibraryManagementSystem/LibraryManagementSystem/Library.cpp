@@ -110,7 +110,7 @@ bool Library::lookupBook(std::string_view author, std::string_view title, Book* 
 	return false;
 }
 
-bool Library::lookupCustomer(const std::string& name, const std::string& address, Customer* customerPtr) const
+bool Library::lookupCustomer(std::string_view name, std::string_view address, Customer* customerPtr) const
 {
 	for (auto& entry : s_customerMap) 
 	{

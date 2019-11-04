@@ -31,7 +31,7 @@ public:
 	
 private:
 	bool lookupBook(std::string_view author, std::string_view title, Book* bookPtr = nullptr) const;
-	bool lookupCustomer(const std::string& name, const std::string& address, Customer* customerPtr = nullptr) const;
+	bool lookupCustomer(std::string_view name, std::string_view address, Customer* customerPtr = nullptr) const;
 
 	void addBook();
 	void deleteBook();
