@@ -30,10 +30,12 @@ Library::Library()
 			<< ": ";
 
 		string text;
-		cin >> text;
+		cin >> text; // should i use getline so i dont have the space issue?
+		cin.clear();
+		cin.ignore(1, '\n');
 		cout << endl;
 
-		int choice = -1;
+		auto choice = -1;
 		sscanf_s(text.c_str(), "%i", &choice);
 
 		switch (choice) {
@@ -76,7 +78,11 @@ Library::Library()
 		case 0:
 			quit = true;
 			break;
-		}
+		default:
+			quit = true;
+			break;
+		};
+		
 
 		cout << endl;
 	}
@@ -84,12 +90,13 @@ Library::Library()
 	save();
 }
 
-bool Library::lookupBook(const std::string& author, const std::string& title, Book* bookPtr)
+bool Library::lookupBook(std::string_view author, std::string_view title, Book* bookPtr) const
 {
-	for(auto& entry : s_bookMap) // investigate const pair<int,Book>&
+	for(auto& entry : s_bookMap) 
 	{
 		auto& book = entry.second;
-		if(book.Author() == author)
+		if(book.Author() == author 
+		&& book.Title() == title)
 		{
 			if(bookPtr != nullptr)
 			{
@@ -102,12 +109,14 @@ bool Library::lookupBook(const std::string& author, const std::string& title, Bo
 	return false;
 }
 
-bool Library::lookupCustomer(const std::string& name, const std::string& address, Customer* customerPtr)
+bool Library::lookupCustomer(std::string_view name, std::string_view address, Customer* customerPtr) const
 {
-	for (auto& entry : s_customerMap) {
+	for (auto& entry : s_customerMap) 
+	{
 		auto& customer = entry.second;
 
-		if ((customer.name() == name) &&(customer.address() == address)) 
+		if ((customer.name() == name) 
+		&&(customer.address() == address)) 
 		{
 			if (customerPtr != nullptr) 
 			{
@@ -123,54 +132,66 @@ bool Library::lookupCustomer(const std::string& name, const std::string& address
 
 void Library::addBook()
 {
-	string author;
-	cout << "Author: ";
-	cin >> author;
+	string author, title;
+	getBookDetails(author, title);
 
-	string title;
-	cout << "Title: ";
-	cin >> title;
-
-	if (lookupBook(author, title)) 
+	auto bookFromLibrary = make_unique<Book>();
+	if (lookupBook(author, title, bookFromLibrary.get()))
 	{
-		cout << endl << "The book \"" << title << "\" by "	<< author << " already exists." << endl;
+		cout << endl << *bookFromLibrary << endl;
+		bookFromLibrary.reset();
 		return;
 	}
-
-	cout << "Title: ";
-	cin >> title;
+	bookFromLibrary.reset();
 
 	Book book(author, title);
-	s_bookMap[book.bookId()] = std::move(book);
 	cout << endl << "Added: " << book << endl;
+	s_bookMap[book.bookId()] = std::move(book);
+	
+}
+
+void Library::getBookDetails(std::string& author, std::string& title)
+{
+	cout << "Author: ";
+	getline(cin, author);
+	
+	cout << "Title: ";
+	getline(cin, title);	
+}
+
+void Library::getCustomerDetails(std::string& name, std::string& address)
+{
+	cout << "Name: ";
+	getline(cin, name);
+
+	cout << "Address: ";
+	getline(cin, address);
 }
 
 void Library::deleteBook()
 {
-	string author;
-	cout << "Author: ";
-	cin >> author;
+	string author, title;
+	getBookDetails(author, title);
 
-	string title;
-	cout << "Title: ";
-	cin >> title;
 
-	Book book;
-	if (!lookupBook(author, title, &book)) 
+	auto bookFromLibrary = make_unique<Book>();
+	if (!lookupBook(author, title, bookFromLibrary.get()))
 	{
 		cout << endl << "The book \"" << title << "\" by "	<< author << " does not exist." << endl;
+		bookFromLibrary.reset();
 		return;
 	}
 
 	for (auto& entry : s_customerMap) 
 	{
 		auto& customer = entry.second;
-		customer.returnBook(book.bookId());
-		customer.unreserveBook(book.bookId());
+		customer.returnBook(bookFromLibrary->bookId());
+		customer.unreserveBook(bookFromLibrary->bookId());
 		s_customerMap[customer.id()] = std::move(customer);
 	}
 
-	s_bookMap.erase(book.bookId());
+	s_bookMap.erase(bookFromLibrary->bookId());
+	bookFromLibrary.reset();
 	cout << endl << "Deleted." << endl;
 }
 
@@ -191,56 +212,54 @@ void Library::listBooks()
 
 void Library::addCustomer()
 {
-	string name;
-	cout << "Name: ";
-	cin >> name;
+	string name, address;
+	getCustomerDetails(name, address);
 
-	string address;
-	cout << "Address: ";
-	cin >> address;
-
-	if (lookupCustomer(name, address)) {
-		cout << endl << "A customer with name " << name 	<< " and address " << address << " already exists."			<< endl;
+	auto customerFromLibrary = make_unique<Customer>();
+	if (lookupCustomer(name, address, customerFromLibrary.get())) 
+	{
+		cout << endl << "A customer with name " << name	<< " and address " << address << " already exists."	<< endl;
+		customerFromLibrary.reset();
 		return;
 	}
-
+	customerFromLibrary.reset();
+	
 	Customer customer(name, address);
+	cout << endl << "Added " << customer << endl;
 	s_customerMap[customer.id()] = std::move(customer);
-	cout << endl << "Added." << endl;
+	
 }
 
 void Library::deleteCustomer()
 {
-	string name;
-	cout << "Name: ";
-	cin >> name;
+	string name, address;
+	getCustomerDetails(name, address);
 
-	string address;
-	cout << "Address: ";
-	cin >> address;
-
-	Customer customer;
-	if (!lookupCustomer(name, address, &customer)) 
+	auto customerFromLibrary = make_unique<Customer>();
+	if (!lookupCustomer(name, address, customerFromLibrary.get()))
 	{
 		cout << endl << "There is no customer with name " << name 	<< " and address " << address << "." << endl;
+		customerFromLibrary.reset();
 		return;
 	}
 
-	if (customer.hasBorrowed()) 
+	if (customerFromLibrary->hasBorrowed())
 	{
 		cout << "Customer " << name << " has borrowed at least " << "one book and cannot be deleted." << endl;
+		customerFromLibrary.reset();
 		return;
 	}
 
 	for (auto& entry : s_bookMap) 
 	{
 		auto& book = entry.second;
-		book.unreserveBook(customer.id());
+		book.unreserveBook(customerFromLibrary->id());
 		s_bookMap[book.bookId()] = std::move(book);
 	}
 
 	cout << endl << "Deleted." << endl;
-	s_customerMap.erase(customer.id());
+	s_customerMap.erase(customerFromLibrary->id());
+	customerFromLibrary.reset();
 }
 
 void Library::listCustomers()
@@ -260,48 +279,44 @@ void Library::listCustomers()
 
 void Library::borrowBook()
 {
-	string author;
-	cout << "Author: ";
-	cin >> author;
+	string author, title;
+	getBookDetails(author, title);
 
-	string title;
-	cout << "Title: ";
-	cin >> title;
 
-	Book book;
-	if (!lookupBook(author, title, &book)) 
+	auto bookFromLibrary = make_unique<Book>();
+	if (!lookupBook(author, title, bookFromLibrary.get()))
 	{
-		cout << endl << "There is no book \"" << title << "\" by "			<< " author " << author << "." << endl;
+		cout << endl << "There is no book \"" << title << "\" by " << " author " << author << "." << endl;
+		bookFromLibrary.reset();
 		return;
 	}
 
-	if (book.borrowed()) 
+	if (bookFromLibrary->borrowed())
 	{
 		cout << endl << "The book \"" << title << "\" by " << author << " has already been borrowed." << endl;
+		bookFromLibrary.reset();
 		return;
 	}
 
-	string name;
-	cout << "Customer name: ";
-	cin >> name;
+	string name, address;
+	getCustomerDetails(name, address);
 
-	string address;
-	cout << "Adddress: ";
-	cin >> address;
-
-	Customer customer;
-	if (!lookupCustomer(name, address, &customer)) 
+	auto customerFromLibrary = make_unique<Customer>();
+	if (!lookupCustomer(name, address, customerFromLibrary.get()))
 	{
-		cout << endl << "There is no customer with name " << name
-			<< " and address " << address << "." << endl;
+		cout << endl << "There is no customer with name " << name << " and address " << address << "." << endl;
+		customerFromLibrary.reset();
 		return;
 	}
 
-	book.borrowBook(customer.id());
-	customer.borrowBook(book.bookId());
+	bookFromLibrary->borrowBook(customerFromLibrary->id());
+	customerFromLibrary->borrowBook(bookFromLibrary->bookId());
 
-	s_bookMap[book.bookId()] = std::move(book);
-	s_customerMap[customer.id()] = std::move(customer);
+	s_bookMap[bookFromLibrary->bookId()] = std::move(*bookFromLibrary);
+	s_customerMap[customerFromLibrary->id()] = std::move(*customerFromLibrary);
+
+	customerFromLibrary.reset();
+	bookFromLibrary.reset();
 	
 	cout << endl << "Borrowed." << endl;
 	
@@ -309,103 +324,103 @@ void Library::borrowBook()
 
 void Library::reserveBook()
 {
-	string author;
-	cout << "Author: ";
-	cin >> author;
+	string author, title;
+	getBookDetails(author, title);
 
-	string title;
-	cout << "Title: ";
-	cin >> title;
 
-	Book book;
-	if (!lookupBook(author, title, &book)) 
+	auto bookFromLibrary = make_unique<Book>();
+	if (!lookupBook(author, title, bookFromLibrary.get()))
 	{
 		cout << endl << "There is no book \"" << title << "\" by "	<< "author " << author << "." << endl;
+		bookFromLibrary.reset();
 		return;
 	}
 
-	if (!book.borrowed()) 
+	if (!bookFromLibrary->borrowed())
 	{
 		cout << endl << "The book with author " << author	<< " and title \"" << title << "\" has not been "	<< "borrowed. Please borrow the book instead." << endl;
+		bookFromLibrary.reset();
 		return;
 	}
 
-	string name;
-	cout << "Customer name: ";
-	cin >> name;
+	string name, address;
+	getCustomerDetails(name, address);
 
-	string address;
-	cout << "Address: ";
-	cin >> address;
-
-	Customer customer;
-	if (!lookupCustomer(name, address, &customer)) 
+	auto customerFromLibrary = make_unique<Customer>();
+	if (!lookupCustomer(name, address, customerFromLibrary.get()))
 	{
-		cout << endl << "No customer with name " << name
-			<< " and address " << address << " exists." << endl;
+		cout << endl << "No customer with name " << name<< " and address " << address << " exists." << endl;
+		bookFromLibrary.reset();
+		customerFromLibrary.reset();
 		return;
 	}
 
-	if (book.customerId() == customer.id()) {
-		cout << endl << "The book has already been borrowed by "
-			<< name << "." << endl;
+	if (bookFromLibrary->customerId() == customerFromLibrary->id()) 
+	{
+		cout << endl << "The book has already been borrowed by "<< name << "." << endl;
+		customerFromLibrary.reset();
+		bookFromLibrary.reset();
 		return;
 	}
 
-	customer.reserveBook(book.bookId());
-	auto position = book.reserveBook(customer.id());
+	customerFromLibrary->reserveBook(bookFromLibrary->bookId());
+	auto position = bookFromLibrary->reserveBook(customerFromLibrary->id());
 	
-	s_bookMap[book.bookId()] = std::move(book);
-	s_customerMap[customer.id()] = std::move(customer);
+	s_bookMap[bookFromLibrary->bookId()] = std::move(*bookFromLibrary);
+	s_customerMap[customerFromLibrary->id()] = std::move(*customerFromLibrary);
 	cout << endl << position << "nd reserve." << endl;
+
+	customerFromLibrary.reset();
+	bookFromLibrary.reset();
 	
 }
 
 void Library::returnBook()
 {
-	string author;
-	cout << "Author: ";
-	cin >> author;
+	string author, title;
+	getBookDetails(author, title);
 
-	string title;
-	cout << "Title: ";
-	cin >> title;
 
-	Book book;
-	if (!lookupBook(author, title, &book)) 
+	auto bookFromLibrary = make_unique<Book>();
+	if (!lookupBook(author, title, bookFromLibrary.get())) 
 	{
 		cout << endl << "No book \"" << title	<< "\" by " << author << " exists." << endl;
+		bookFromLibrary.reset();
 		return;
 	}
 
-	if (!book.borrowed()) 
+	if (!bookFromLibrary->borrowed())
 	{
 		cout << endl << "The book \"" << title	<< "\" by " << author	<< "\" has not been borrowed." << endl;
+		bookFromLibrary.reset();
 		return;
 	}
 
-	book.returnBook();
-	cout << endl << "Returned." << endl;
+	bookFromLibrary->returnBook();
+	cout << endl << "Returned " << *bookFromLibrary <<  endl;
 
-	auto customer = std::move(s_customerMap[book.customerId()]);
-	customer.returnBook(book.bookId());
+	auto customer = std::move(s_customerMap[bookFromLibrary->customerId()]);
+	customer.returnBook(bookFromLibrary->bookId());
 	s_customerMap[customer.id()] = std::move(customer);
 
-	auto& reservationList = book.reservationList();
+	auto& reservationList = bookFromLibrary->reservationList();
 
-	if (!reservationList.empty()) {
+	if (!reservationList.empty()) 
+	{
 		auto newCustomerId = reservationList.front();
 		reservationList.erase(reservationList.begin());
-		book.borrowBook(newCustomerId);
+		bookFromLibrary->borrowBook(newCustomerId);
 
 		auto newCustomer = std::move( s_customerMap[newCustomerId]);
-		newCustomer.borrowBook(book.bookId());
+		newCustomer.borrowBook(bookFromLibrary->bookId());
 
-		s_customerMap[newCustomerId] = std::move(newCustomer);
 		cout << endl << "Borrowed by " << newCustomer.name() << endl;
+		s_customerMap[newCustomerId] = std::move(newCustomer);
+		
 	}
 
-	s_bookMap[book.bookId()] = std::move(book);
+	s_bookMap[bookFromLibrary->bookId()] = std::move(*bookFromLibrary);
+	bookFromLibrary.reset();
 }
 
 void Library::load()
@@ -415,9 +430,9 @@ void Library::load()
 	if (inStream) 
 	{
 		int numberOfBooks;
-		inStream.read((char*)&numberOfBooks, sizeof numberOfBooks);
+		inStream.read(reinterpret_cast<char*>(&numberOfBooks), sizeof numberOfBooks);
 
-		for (int count = 0; count < numberOfBooks; ++count) 
+		for (auto count = 0; count < numberOfBooks; ++count) 
 		{
 			Book book;
 			book.read(inStream);
@@ -427,9 +442,9 @@ void Library::load()
 		}
 
 		int numberOfCustomers;
-		inStream.read((char*)&numberOfCustomers,sizeof numberOfCustomers);
+		inStream.read(reinterpret_cast<char*>(&numberOfCustomers),sizeof numberOfCustomers);
 
-		for (int count = 0; count < numberOfCustomers; ++count) 
+		for (auto count = 0; count < numberOfCustomers; ++count) 
 		{
 			Customer customer;
 			customer.read(inStream);
@@ -445,22 +460,24 @@ void Library::save()
 	ofstream outStream(s_binaryPath);
 	if (outStream) 
 	{
-		int numberOfBooks = s_bookMap.size();
-		outStream.write((char*)&numberOfBooks, sizeof numberOfBooks);
+		auto numberOfBooks = s_bookMap.size();
+		outStream.write(reinterpret_cast<char*>(&numberOfBooks), sizeof numberOfBooks);
 
-		for (const pair<const int, Book>& entry : s_bookMap) 
+		for (const auto& entry : s_bookMap) 
 		{
 			const auto& book = entry.second;
 			book.write(outStream);
 		}
 
-		int numberOfCustomers = s_customerMap.size();
-		outStream.write((char*)&numberOfCustomers,sizeof numberOfCustomers);
+		auto numberOfCustomers = s_customerMap.size();
+		outStream.write(reinterpret_cast<char*>(&numberOfCustomers),sizeof numberOfCustomers);
 
-		for (const pair<const int, Customer>& entry : s_customerMap) 
+		for (const auto& entry : s_customerMap) 
 		{
 			const auto& customer = entry.second;
 			customer.write(outStream);
 		}
 	}
 }
+
+

@@ -6,6 +6,8 @@ class Customer
 {
 public:
 	Customer() = default;
+	virtual ~Customer() = default;
+	
 	Customer(std::string name, std::string address);
 
 	// disallow assignment and pass by value

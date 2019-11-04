@@ -1,6 +1,7 @@
 #pragma once
 #include <set>
 #include <map>
+#include <string_view>
 #include "Book.h"
 #include "Customer.h"
 
@@ -8,6 +9,7 @@ class Library
 {
 public:
 	Library();
+	virtual ~Library() = default;
 
 	// disallow assignment and pass by value
 	Library(const Library& src) = delete;
@@ -28,8 +30,8 @@ public:
 	
 	
 private:
-	bool lookupBook(const std::string& author, const std::string& title, Book* bookPtr = nullptr);
-	bool lookupCustomer(const std::string& name, const std::string& address, Customer* customerPtr = nullptr);
+	bool lookupBook(std::string_view author, std::string_view title, Book* bookPtr = nullptr) const;
+	bool lookupCustomer(std::string_view name, std::string_view address, Customer* customerPtr = nullptr) const;
 
 	void addBook();
 	void deleteBook();
@@ -40,9 +42,12 @@ private:
 	void borrowBook();
 	void reserveBook();
 	void returnBook();
-
+	
 	void load();
 	void save();
+
+	void getBookDetails(std::string& author, std::string& title);
+	void getCustomerDetails(std::string& name, std::string& address);
 	
 	static string s_binaryPath;
 };
