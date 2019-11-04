@@ -234,28 +234,31 @@ void Library::deleteCustomer()
 	string name, address;
 	getCustomerDetails(name, address);
 
-	Customer customer;
-	if (!lookupCustomer(name, address, &customer)) 
+	auto customerFromLibrary = make_unique<Customer>();
+	if (!lookupCustomer(name, address, customerFromLibrary.get()))
 	{
 		cout << endl << "There is no customer with name " << name 	<< " and address " << address << "." << endl;
+		customerFromLibrary.reset();
 		return;
 	}
 
-	if (customer.hasBorrowed()) 
+	if (customerFromLibrary->hasBorrowed())
 	{
 		cout << "Customer " << name << " has borrowed at least " << "one book and cannot be deleted." << endl;
+		customerFromLibrary.reset();
 		return;
 	}
 
 	for (auto& entry : s_bookMap) 
 	{
 		auto& book = entry.second;
-		book.unreserveBook(customer.id());
+		book.unreserveBook(customerFromLibrary->id());
 		s_bookMap[book.bookId()] = std::move(book);
 	}
 
 	cout << endl << "Deleted." << endl;
-	s_customerMap.erase(customer.id());
+	s_customerMap.erase(customerFromLibrary->id());
+	customerFromLibrary.reset();
 }
 
 void Library::listCustomers()
