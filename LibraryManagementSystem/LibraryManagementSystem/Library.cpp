@@ -504,6 +504,21 @@ void Library::load()
 		m_customerList.push_back(customer);
 	}
 
+	// reset the borrowed state for books
+	for (const auto book : m_bookList)
+	{
+		auto bookIsBorrowed = false;
+		inStream.read(reinterpret_cast<char*>(bookIsBorrowed), sizeof bookIsBorrowed);
+		if(bookIsBorrowed)
+		{
+			auto borrowedBookIndex = 0;
+			inStream.read(reinterpret_cast<char*>(&borrowedBookIndex), sizeof borrowedBookIndex);
+			// TODO how to get the pointer out
+			auto cust = lookupCustomerPtr(borrowedBookIndex);
+			
+		}
+	}
+
 
 	
 
