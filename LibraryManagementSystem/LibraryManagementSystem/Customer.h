@@ -8,7 +8,7 @@ public:
 	Customer() = default;
 	virtual ~Customer() = default;
 	
-	Customer(std::string name, std::string address);
+	Customer(std::string_view name, std::string_view address);
 
 	// disallow assignment and pass by value
 	Customer(const Customer& src) = delete;
@@ -21,38 +21,35 @@ public:
 	void read(std::ifstream& inStream);
 	void write(std::ofstream& outStream) const;
 
-	void borrowBook(int bookId)
+	void borrowBook(Book* book)
 	{
-		m_loanSet.insert(bookId);
+		m_loanSet.insert(book);
 	}
-	void reserveBook(int bookId)
+	void reserveBook(Book* book)
 	{
-		m_reservationSet.insert(bookId);
+		m_reservationSet.insert(book);
 	}
-	void returnBook(int bookId)
+	void returnBook(Book* book)
 	{
-		m_loanSet.erase(bookId);
+		m_loanSet.erase(book);
 	}
-	void unreserveBook(int bookId)
+	void unreserveBook(Book* book)
 	{
-		m_reservationSet.erase(bookId);
-	}
-	bool hasBorrowed(void) const
-	{
-		return !m_loanSet.empty();
+		m_reservationSet.erase(book);
 	}
 
-	const std::string& name() const { return m_name; }
-	const std::string& address() const { return m_address; }
-	int id() const { return m_customerId; }
-
-	static int MaxCustomerId;
+	[[nodiscard]] auto hasBorrowed() const	{return !m_loanSet.empty();	}
+	[[nodiscard]] auto name() const { return m_name; }
+	[[nodiscard]] auto address() const { return m_address; }
+	[[nodiscard]] std::set<Book*> BooksBorrowed() const { return m_loanSet; }
+	[[nodiscard]] std::set<Book*> ReservationList() const { return m_reservationSet; }
+	
 	friend std::ostream& operator<<(std::ostream& outStream,const Customer& customer);
 
 private:
-	int m_customerId = 0;
-	std::string m_name;
-	std::string m_address;
-	std::set<int> m_loanSet, m_reservationSet;
+	
+	std::string_view m_name;
+	std::string_view m_address;
+	std::set<Book*> m_loanSet, m_reservationSet;
 };
 

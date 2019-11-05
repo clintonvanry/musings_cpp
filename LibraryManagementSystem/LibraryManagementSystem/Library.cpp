@@ -5,9 +5,6 @@
 
 using namespace std;
 
-map<int, Book> Library::s_bookMap;
-map<int, Customer> Library::s_customerMap;
-
 string Library::s_binaryPath(".\\Debug\\Library.binary");
 
 Library::Library()
@@ -90,17 +87,29 @@ Library::Library()
 	save();
 }
 
-bool Library::lookupBook(std::string_view author, std::string_view title, Book* bookPtr) const
+Library::~Library()
 {
-	for(auto& entry : s_bookMap) 
+	for(const auto book : m_bookList)
 	{
-		auto& book = entry.second;
-		if(book.Author() == author 
-		&& book.Title() == title)
+		delete book;
+	}
+	for(const auto customer : m_customerList)
+	{
+		delete customer;
+	}
+	
+}
+
+auto Library::lookupBook(std::string_view author, std::string_view title, Book* bookPtr) const
+{
+	for(auto book : m_bookList)
+	{
+		if(book->Author() == author 
+		&& book->Title() == title)
 		{
 			if(bookPtr != nullptr)
 			{
-				*bookPtr = std::move(book); // investigate further std::move thin this due to assignment and copy constructor
+				bookPtr = book; // investigate further std::move thin this due to assignment and copy constructor
 			}
 			return true;
 		}
@@ -109,18 +118,16 @@ bool Library::lookupBook(std::string_view author, std::string_view title, Book* 
 	return false;
 }
 
-bool Library::lookupCustomer(std::string_view name, std::string_view address, Customer* customerPtr) const
+auto Library::lookupCustomer(std::string_view name, std::string_view address, Customer* customerPtr) const
 {
-	for (auto& entry : s_customerMap) 
+	for (auto customer : m_customerList) 
 	{
-		auto& customer = entry.second;
-
-		if ((customer.name() == name) 
-		&&(customer.address() == address)) 
+		if ((customer->name() == name) 
+		&&(customer->address() == address)) 
 		{
 			if (customerPtr != nullptr) 
 			{
-				*customerPtr = std::move(customer); // investigate
+				customerPtr = customer;
 			}
 
 			return true;
@@ -128,6 +135,57 @@ bool Library::lookupCustomer(std::string_view name, std::string_view address, Cu
 	}
 
 	return false;
+}
+
+auto Library::lookupBookIndex(const Book* bookPtr)
+{
+	auto index = 0;
+	for(const auto book : m_bookList)
+	{
+		if(book == bookPtr)
+		{
+			return index;
+		}
+		index++;
+	}
+	return -1;
+}
+
+auto Library::lookupCustomerIndex(const Customer* customerPtr)
+{
+	auto index = 0;
+	for (const auto customer : m_customerList)
+	{
+		if (customer == customerPtr)
+		{
+			return index;
+		}
+		index++;
+	}
+	return -1;
+}
+
+
+auto Library::lookupBookPtr(int bookIndex)
+{
+	auto bookInterator = m_bookList.begin(); // read up on this one
+	
+	for (auto i = 0; i < bookIndex; ++i)
+	{
+		++bookInterator;
+	}
+	return *bookInterator;
+}
+
+auto Library::lookupCustomerPtr(int customerIndex)
+{
+	auto customerInterator = m_customerList.begin();
+	
+	for(auto i = 0; i < customerIndex; ++i)
+	{
+		++customerInterator;
+	}
+	return *customerInterator;
 }
 
 void Library::addBook()
@@ -138,19 +196,19 @@ void Library::addBook()
 	auto bookFromLibrary = make_unique<Book>();
 	if (lookupBook(author, title, bookFromLibrary.get()))
 	{
-		cout << endl << *bookFromLibrary << endl;
+		cout << endl << bookFromLibrary << endl;
 		bookFromLibrary.reset();
 		return;
 	}
 	bookFromLibrary.reset();
 
-	Book book(author, title);
+	auto book = new Book(author, title); // should this not be deleted near the end. adding to the list is likely a copy?
 	cout << endl << "Added: " << book << endl;
-	s_bookMap[book.bookId()] = std::move(book);
+	m_bookList.push_back(book);
 	
 }
 
-void Library::getBookDetails(std::string& author, std::string& title)
+void Library::getBookDetails(std::string& author, std::string& title) const
 {
 	cout << "Author: ";
 	getline(cin, author);
@@ -159,7 +217,7 @@ void Library::getBookDetails(std::string& author, std::string& title)
 	getline(cin, title);	
 }
 
-void Library::getCustomerDetails(std::string& name, std::string& address)
+void Library::getCustomerDetails(std::string& name, std::string& address) const
 {
 	cout << "Name: ";
 	getline(cin, name);
@@ -182,30 +240,35 @@ void Library::deleteBook()
 		return;
 	}
 
-	for (auto& entry : s_customerMap) 
+	// only one person that can borrow a book
+	auto customerBorrowedBook = bookFromLibrary->customer();
+	if(customerBorrowedBook != nullptr)
 	{
-		auto& customer = entry.second;
-		customer.returnBook(bookFromLibrary->bookId());
-		customer.unreserveBook(bookFromLibrary->bookId());
-		s_customerMap[customer.id()] = std::move(customer);
+		customerBorrowedBook->returnBook(bookFromLibrary.get());
 	}
-
-	s_bookMap.erase(bookFromLibrary->bookId());
+	
+	// many people can reserve a book
+	for (auto customer : bookFromLibrary->ReservationList())
+	{
+		customer->unreserveBook(bookFromLibrary.get());
+	}
+	
+	m_bookList.remove(bookFromLibrary.get());
+	cout << endl << "Deleted book" << bookFromLibrary.get() << endl;
 	bookFromLibrary.reset();
-	cout << endl << "Deleted." << endl;
+	
 }
 
 void Library::listBooks()
 {
-	if (s_bookMap.empty()) 
+	if (m_bookList.empty()) 
 	{
-		cout << "No books." << endl;
+		cout << "No books available in the Library. Please add a book to the library" << endl;
 		return;
 	}
 
-	for (const auto& entry : s_bookMap) 
+	for (const auto book : m_bookList) 
 	{
-		const auto& book = entry.second;
 		cout << book << endl;
 	}
 }
@@ -224,9 +287,9 @@ void Library::addCustomer()
 	}
 	customerFromLibrary.reset();
 	
-	Customer customer(name, address);
+	auto customer = new Customer(name, address);
 	cout << endl << "Added " << customer << endl;
-	s_customerMap[customer.id()] = std::move(customer);
+	m_customerList.push_back(customer);
 	
 }
 
@@ -250,29 +313,27 @@ void Library::deleteCustomer()
 		return;
 	}
 
-	for (auto& entry : s_bookMap) 
+	for (auto& book : m_bookList) 
 	{
-		auto& book = entry.second;
-		book.unreserveBook(customerFromLibrary->id());
-		s_bookMap[book.bookId()] = std::move(book);
+		book->unreserveBook(customerFromLibrary.get());
 	}
 
-	cout << endl << "Deleted." << endl;
-	s_customerMap.erase(customerFromLibrary->id());
+	
+	m_customerList.remove(customerFromLibrary.get());
+	cout << endl << "Deleted customer" << customerFromLibrary.get() << endl;
 	customerFromLibrary.reset();
 }
 
 void Library::listCustomers()
 {
-	if (s_customerMap.empty()) 
+	if (m_customerList.empty()) 
 	{
-		cout << "No customers." << endl;
+		cout << "No customers in the library" << endl;
 		return;
 	}
 
-	for (const auto& entry : s_customerMap) 
+	for (const auto customer : m_customerList)
 	{
-		const auto& customer = entry.second;
 		cout << customer << endl;
 	}
 }
@@ -309,16 +370,13 @@ void Library::borrowBook()
 		return;
 	}
 
-	bookFromLibrary->borrowBook(customerFromLibrary->id());
-	customerFromLibrary->borrowBook(bookFromLibrary->bookId());
+	bookFromLibrary->borrowBook(customerFromLibrary.get());
+	customerFromLibrary->borrowBook(bookFromLibrary.get());
 
-	s_bookMap[bookFromLibrary->bookId()] = std::move(*bookFromLibrary);
-	s_customerMap[customerFromLibrary->id()] = std::move(*customerFromLibrary);
-
+	cout << endl << "customer: " << customerFromLibrary << endl << " borrowed book:" << bookFromLibrary << endl;
+	
 	customerFromLibrary.reset();
 	bookFromLibrary.reset();
-	
-	cout << endl << "Borrowed." << endl;
 	
 }
 
@@ -355,7 +413,7 @@ void Library::reserveBook()
 		return;
 	}
 
-	if (bookFromLibrary->customerId() == customerFromLibrary->id()) 
+	if (bookFromLibrary->customer() == customerFromLibrary.get()) 
 	{
 		cout << endl << "The book has already been borrowed by "<< name << "." << endl;
 		customerFromLibrary.reset();
@@ -363,11 +421,9 @@ void Library::reserveBook()
 		return;
 	}
 
-	customerFromLibrary->reserveBook(bookFromLibrary->bookId());
-	auto position = bookFromLibrary->reserveBook(customerFromLibrary->id());
+	customerFromLibrary->reserveBook(bookFromLibrary.get());
+	auto position = bookFromLibrary->reserveBook(customerFromLibrary.get());
 	
-	s_bookMap[bookFromLibrary->bookId()] = std::move(*bookFromLibrary);
-	s_customerMap[customerFromLibrary->id()] = std::move(*customerFromLibrary);
 	cout << endl << position << "nd reserve." << endl;
 
 	customerFromLibrary.reset();
@@ -396,30 +452,28 @@ void Library::returnBook()
 		return;
 	}
 
-	bookFromLibrary->returnBook();
-	cout << endl << "Returned " << *bookFromLibrary <<  endl;
+	auto customer = bookFromLibrary->customer();
+	bookFromLibrary->returnBook(); // this will null the customer;
+	cout << endl << "Returned " << bookFromLibrary <<  endl;
 
-	auto customer = std::move(s_customerMap[bookFromLibrary->customerId()]);
-	customer.returnBook(bookFromLibrary->bookId());
-	s_customerMap[customer.id()] = std::move(customer);
+	
+	customer->returnBook(bookFromLibrary.get());
+	
 
-	auto& reservationList = bookFromLibrary->reservationList();
+	auto reservationList = bookFromLibrary->ReservationList();
 
 	if (!reservationList.empty()) 
 	{
-		auto newCustomerId = reservationList.front();
+		auto newCustomer = reservationList.front();
 		reservationList.erase(reservationList.begin());
-		bookFromLibrary->borrowBook(newCustomerId);
+		
+		bookFromLibrary->borrowBook(newCustomer);
+		newCustomer->borrowBook(bookFromLibrary.get());
 
-		auto newCustomer = std::move( s_customerMap[newCustomerId]);
-		newCustomer.borrowBook(bookFromLibrary->bookId());
-
-		cout << endl << "Borrowed by " << newCustomer.name() << endl;
-		s_customerMap[newCustomerId] = std::move(newCustomer);
+		cout << endl << "Book:" << bookFromLibrary.get() << endl << "Borrowed by: " << newCustomer->name() << endl;
 		
 	}
 
-	s_bookMap[bookFromLibrary->bookId()] = std::move(*bookFromLibrary);
 	bookFromLibrary.reset();
 }
 
@@ -427,57 +481,112 @@ void Library::load()
 {
 	ifstream inStream(s_binaryPath);
 
-	if (inStream) 
+	if(!inStream)
 	{
-		int numberOfBooks;
-		inStream.read(reinterpret_cast<char*>(&numberOfBooks), sizeof numberOfBooks);
-
-		for (auto count = 0; count < numberOfBooks; ++count) 
-		{
-			Book book;
-			book.read(inStream);
-			auto bookId = book.bookId();
-			s_bookMap[bookId] = std::move(book);
-			Book::MaxBookId = max(Book::MaxBookId, bookId);
-		}
-
-		int numberOfCustomers;
-		inStream.read(reinterpret_cast<char*>(&numberOfCustomers),sizeof numberOfCustomers);
-
-		for (auto count = 0; count < numberOfCustomers; ++count) 
-		{
-			Customer customer;
-			customer.read(inStream);
-			auto customerId = customer.id();
-			s_customerMap[customer.id()] = std::move(customer);
-			Customer::MaxCustomerId = max(Customer::MaxCustomerId, customerId);
-		}
+		return;
 	}
+	
+	auto bookListSize = 0;
+	inStream.read(reinterpret_cast<char*>(&bookListSize), sizeof bookListSize);
+	for(auto i = 0; i < bookListSize; i++)
+	{
+		auto book = new Book();
+		book->read(inStream);
+		m_bookList.push_back(book);
+	}
+
+	auto customerListSize = 0;
+	inStream.read(reinterpret_cast<char*>(&customerListSize), sizeof customerListSize);
+	for (auto i = 0; i < customerListSize; i++)
+	{
+		auto customer = new Customer();
+		customer->read(inStream);
+		m_customerList.push_back(customer);
+	}
+
+
+	
+
 }
 
 void Library::save()
 {
 	ofstream outStream(s_binaryPath);
-	if (outStream) 
+	if (!outStream)
 	{
-		auto numberOfBooks = s_bookMap.size();
-		outStream.write(reinterpret_cast<char*>(&numberOfBooks), sizeof numberOfBooks);
+		// should throw exception
+		return;
+	}
 
-		for (const auto& entry : s_bookMap) 
+	// write the size of the book list
+	auto bookListSize = m_bookList.size();
+	outStream.write(reinterpret_cast<char*>(&bookListSize), sizeof bookListSize);
+	// each book write its contents to disk
+	for(const auto book : m_bookList)
+	{
+		book->write(outStream);
+	}
+
+	// write the size of the customer list
+	auto customerListSize = m_customerList.size();
+	outStream.write(reinterpret_cast<char*>(&customerListSize), sizeof bookListSize);
+	// each customer write its contents to disk
+	for (const auto customer : m_customerList)
+	{
+		customer->write(outStream);
+	}
+
+	// write the book specifics
+	for (const auto book : m_bookList)
+	{
+		// store the index of the customer who borrowed the book if it is borrowed.
+		auto bookIsBorrowed = book->borrowed();
+		outStream.write(reinterpret_cast<char*>(bookIsBorrowed), sizeof bookIsBorrowed);
+		if(bookIsBorrowed) // write the index of the customer
 		{
-			const auto& book = entry.second;
-			book.write(outStream);
+			auto customerIndex = lookupCustomerIndex(book->customer());
+			outStream.write(reinterpret_cast<char*>(customerIndex), sizeof customerIndex);
 		}
 
-		auto numberOfCustomers = s_customerMap.size();
-		outStream.write(reinterpret_cast<char*>(&numberOfCustomers),sizeof numberOfCustomers);
-
-		for (const auto& entry : s_customerMap) 
+		// store the size of the reservation for the book
+		const auto& reservationList = book->ReservationList();
+		auto reservationListSize = reservationList.size();
+		outStream.write(reinterpret_cast<char*>(&reservationListSize), sizeof reservationListSize);
+		for(const auto customer : reservationList)
 		{
-			const auto& customer = entry.second;
-			customer.write(outStream);
+			// write the index
+			auto customerReservationIndex = lookupCustomerIndex(customer);
+			outStream.write(reinterpret_cast<char*>(customerReservationIndex), sizeof customerReservationIndex);
 		}
 	}
+
+	// write the customer specifics
+	for(const auto customer : m_customerList)
+	{
+		const auto& customerBooksBorrowed = customer->BooksBorrowed();
+		auto customerBooksBorrowedSize = customerBooksBorrowed.size();
+		outStream.write(reinterpret_cast<char*>(&customerBooksBorrowedSize), sizeof customerBooksBorrowedSize);
+
+		for(const auto book : customerBooksBorrowed)
+		{
+			auto bookIndex = lookupBookIndex(book);
+			outStream.write(reinterpret_cast<char*>(&bookIndex), sizeof bookIndex);
+		}
+
+		const auto bookReservationList = customer->ReservationList();
+		auto bookReservationListSize = bookReservationList.size();
+		outStream.write(reinterpret_cast<char*>(&bookReservationListSize), sizeof bookReservationListSize);
+		
+		for(const auto bookToBeReserved : bookReservationList)
+		{
+			auto bookReservationIndex = lookupBookIndex(bookToBeReserved);
+			outStream.write(reinterpret_cast<char*>(&bookReservationIndex), sizeof bookReservationIndex);
+		}
+		
+	}
+		
+		
+	
 }
 
 

@@ -18,7 +18,7 @@ class Book
 public:
 	
 	// constructor
-	Book() = delete;
+	Book() = default;
 	virtual ~Book() = default;
 	Book(string_view author, string_view title);
 
@@ -28,7 +28,7 @@ public:
 
 	// explicit default move constructor and assignment
 	Book(Book&& src) = default;
-	Book& operator=(Book&& rhs) = delete;
+	Book& operator=(Book&& rhs) = default;
 	
 	// methods
 	void read(ifstream& inStream);
@@ -39,14 +39,14 @@ public:
 	void unreserveBook(Customer* customer);
 	void returnBook();
 
-	// inline statements
+	
 	
 	[[nodiscard]] auto borrowed() const
 	{
 		return m_bookIsBorrowed;
 	}
 
-	[[nodiscard]] const Customer* customer() const
+	[[nodiscard]] Customer* customer() const
 	{
 		return m_customer;
 	}
@@ -61,11 +61,11 @@ public:
 		return m_title;
 	}
 
-	list<Customer*>& reservationList()
+	[[nodiscard]] auto& ReservationList() const 
 	{
 		return m_reservationList;
 	}
 
-	friend ostream& operator<<(ostream& outStream, const Book& book);
+	friend ostream& operator<<(ostream& outStream, const Book* book);
 };
 

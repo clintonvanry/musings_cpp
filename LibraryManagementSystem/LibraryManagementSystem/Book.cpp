@@ -48,22 +48,28 @@ void Book::returnBook()
 }
 
 
-ostream& operator<<(ostream& outStream, const Book& book)
+ostream& operator<<(ostream& outStream, const Book* book)
 {
-	outStream << " \"" << book.m_title << "\" by " << book.m_author;
+	if(book == nullptr)
+	{
+		return outStream;
+	}
+	
+	outStream << " \"" << book->Title() << "\" by " << book->Author();
 
-	const auto customerBorrowedBook = book.customer();
-	if (book.m_bookIsBorrowed && customerBorrowedBook != nullptr) 
+	const auto customerBorrowedBook = book->customer();
+	if (book->borrowed() && customerBorrowedBook != nullptr) 
 	{
 		outStream << endl << "  Borrowed by: " << customerBorrowedBook->name()<< ".";
 	}
 
-	if (!book.m_reservationList.empty()) 
+	auto reservationList = book->ReservationList();
+	if (!reservationList.empty())
 	{
 		outStream << endl << "  Reserved by: ";
 
 		auto first = true;
-		for (auto customer : book.m_reservationList) 
+		for (const auto customer : reservationList)
 		{
 			outStream << (first ? "" : ",") << ""	<< customer->name();
 			first = false;
