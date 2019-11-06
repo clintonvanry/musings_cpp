@@ -514,13 +514,57 @@ void Library::load()
 			auto borrowedBookIndex = 0;
 			inStream.read(reinterpret_cast<char*>(&borrowedBookIndex), sizeof borrowedBookIndex);
 			// TODO how to get the pointer out
-			auto cust = lookupCustomerPtr(borrowedBookIndex);
-			
+			book->borrowBook(reinterpret_cast<Customer*>(lookupCustomerPtr(borrowedBookIndex)));
+
+			// reservationlist
+			auto reservationList = book->ReservationList();
+			auto reservationListSizeFromStorage = 0;
+			inStream.read(reinterpret_cast<char*>(&reservationListSizeFromStorage), sizeof reservationListSizeFromStorage);
+
+			if(reservationListSizeFromStorage > 0)
+			{
+				for(auto i = 0; i < reservationListSizeFromStorage; ++i)
+				{
+					auto reserverationCustIndex = 0;
+					inStream.read(reinterpret_cast<char*>(&reserverationCustIndex), sizeof reserverationCustIndex);
+					auto reservationCustomer = reinterpret_cast<Customer*>(lookupCustomerPtr(reserverationCustIndex));
+					reservationList.push_back(reservationCustomer);
+				}
+			}
 		}
 	}
 
+	for (const auto customer : m_customerList)
+	{
+		auto borrowedList = customer->BooksBorrowed();
+		int borrowedListSize = borrowedList.size();
+		inStream.read(reinterpret_cast<char*>(&borrowedList), sizeof borrowedListSize);
+		if(borrowedListSize > 0)
+		{
+			for(auto i =0; i < borrowedListSize; ++i)
+			{
+				auto bookIndex = 0;
+				inStream.read(reinterpret_cast<char*>(&bookIndex), sizeof bookIndex);
 
-	
+				auto book = reinterpret_cast<Book*>(lookupBookPtr(bookIndex));
+				borrowedList.insert(book);
+			}
+		}
+		// reservations
+		auto reservations = customer->ReservationList();
+		int reservationSize = reservations.size();
+		inStream.read(reinterpret_cast<char*>(&reservationSize), sizeof reservationSize);
+		if(reservationSize > 0)
+		{
+			for(auto i = 0; i < reservationSize; ++i)
+			{
+				auto reservationBookIndex = 0;
+				inStream.read(reinterpret_cast<char*>(&reservationBookIndex), sizeof reservationBookIndex);
+				auto book = reinterpret_cast<Book*>(lookupBookPtr(reservationBookIndex));
+				reservations.insert(book);
+			}
+		}
+	}
 
 }
 
