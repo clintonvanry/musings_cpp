@@ -9,8 +9,8 @@ class Customer;
 
 class Book
 {
-	string_view m_author;
-	string_view m_title;
+	string m_author;
+	string m_title;
 	Customer* m_customer = nullptr;
 	list<Customer*> m_reservationList;
 	bool m_bookIsBorrowed = false;
@@ -20,7 +20,7 @@ public:
 	// constructor
 	Book() = default;
 	virtual ~Book() = default;
-	Book(string_view author, string_view title);
+	Book(string author, string title);
 
 	// disallow assignment and pass by value
 	Book(const Book& src) = delete;

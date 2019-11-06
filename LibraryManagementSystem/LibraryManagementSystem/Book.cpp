@@ -1,9 +1,11 @@
 #include <fstream>
+#include <utility>
 #include "Book.h"
 #include "Library.h"
 
+using namespace std;
 
-Book::Book(string_view author, string_view title): m_author(author), m_title(title)
+Book::Book(string author, string title): m_author(std::move(author)), m_title(std::move(title))
 {
 }
 

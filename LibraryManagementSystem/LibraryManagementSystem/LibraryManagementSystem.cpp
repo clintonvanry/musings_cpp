@@ -2,8 +2,6 @@
 //
 
 #include <iostream>
-#include "Book.h"
-#include "Customer.h"
 #include "Library.h"
 
 using namespace  std;

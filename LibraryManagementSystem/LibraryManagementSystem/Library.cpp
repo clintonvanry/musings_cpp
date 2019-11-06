@@ -84,7 +84,7 @@ Library::Library()
 		cout << endl;
 	}
 
-	save();
+	//save();
 }
 
 Library::~Library()
@@ -197,10 +197,8 @@ void Library::addBook()
 	if (lookupBook(author, title, bookFromLibrary.get()))
 	{
 		cout << endl << bookFromLibrary << endl;
-		bookFromLibrary.reset();
 		return;
 	}
-	bookFromLibrary.reset();
 
 	auto book = new Book(author, title); // should this not be deleted near the end. adding to the list is likely a copy?
 	cout << endl << "Added: " << book << endl;
