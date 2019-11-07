@@ -451,22 +451,28 @@ void Library::load()
 		}
 	}
 
+	
 	for (const auto customer : m_customerList)
 	{
-		auto borrowedList = customer->BooksBorrowed(); // TODO memory leak here not sure how to resolve
-		int borrowedListSize = borrowedList.size();
-		inStream.read(reinterpret_cast<char*>(&borrowedList), sizeof borrowedListSize);
-		if (borrowedListSize > 0)
+		int borrowedListSize = customer->numberOfBooksBorrowed();
+		if (borrowedListSize > 0) 
 		{
-			for (auto i = 0; i < borrowedListSize; ++i)
+			auto borrowedList = customer->BooksBorrowed(); // TODO memory leak here not sure how to resolve
+			inStream.read(reinterpret_cast<char*>(&borrowedList), sizeof borrowedListSize);
+			if (borrowedListSize > 0)
 			{
-				auto bookIndex = 0;
-				inStream.read(reinterpret_cast<char*>(&bookIndex), sizeof bookIndex);
+				for (auto i = 0; i < borrowedListSize; ++i)
+				{
+					auto bookIndex = 0;
+					inStream.read(reinterpret_cast<char*>(&bookIndex), sizeof bookIndex);
 
-				auto book = lookupBookPtr(bookIndex);
-				borrowedList.insert(book);
+					auto book = lookupBookPtr(bookIndex);
+					borrowedList.insert(book);
+				}
 			}
 		}
+		
+		
 		// reservations
 		auto reservations = customer->ReservationList();
 		int reservationSize = reservations.size();
@@ -541,24 +547,31 @@ void Library::save()
 	// write the customer specifics
 	for (const auto customer : m_customerList)
 	{
-		const auto& customerBooksBorrowed = customer->BooksBorrowed();
-		auto customerBooksBorrowedSize = customerBooksBorrowed.size();
+		
+		auto customerBooksBorrowedSize = customer->numberOfBooksBorrowed();
 		outStream.write(reinterpret_cast<char*>(&customerBooksBorrowedSize), sizeof customerBooksBorrowedSize);
 
-		for (const auto book : customerBooksBorrowed)
+		if (customerBooksBorrowedSize > 0) 
 		{
-			auto bookIndex = lookupBookIndex(book);
-			outStream.write(reinterpret_cast<char*>(&bookIndex), sizeof bookIndex);
+			const auto& customerBooksBorrowed = customer->BooksBorrowed();
+			for (const auto book : customerBooksBorrowed)
+			{
+				auto bookIndex = lookupBookIndex(book);
+				outStream.write(reinterpret_cast<char*>(&bookIndex), sizeof bookIndex);
+			}
 		}
-
-		const auto bookReservationList = customer->ReservationList();
+		
+		const auto& bookReservationList = customer->ReservationList();
 		auto bookReservationListSize = bookReservationList.size();
 		outStream.write(reinterpret_cast<char*>(&bookReservationListSize), sizeof bookReservationListSize);
 
-		for (const auto bookToBeReserved : bookReservationList)
+		if (bookReservationListSize > 0) 
 		{
-			auto bookReservationIndex = lookupBookIndex(bookToBeReserved);
-			outStream.write(reinterpret_cast<char*>(&bookReservationIndex), sizeof bookReservationIndex);
+			for (const auto bookToBeReserved : bookReservationList)
+			{
+				auto bookReservationIndex = lookupBookIndex(bookToBeReserved);
+				outStream.write(reinterpret_cast<char*>(&bookReservationIndex), sizeof bookReservationIndex);
+			}
 		}
 
 	}

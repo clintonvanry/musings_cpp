@@ -26,8 +26,9 @@ public:
 	[[nodiscard]] std::string Name() const { return  m_name; }
 	[[nodiscard]] std::string Address() const { return  m_address; }
 	[[nodiscard]] auto hasBorrowed() const { return !m_loanSet.empty(); }
-	[[nodiscard]] std::set<Book*> BooksBorrowed() const { return m_loanSet; }
-	[[nodiscard]] std::set<Book*> ReservationList() const { return m_reservationSet; }
+	[[nodiscard]] auto numberOfBooksBorrowed() const { return m_loanSet.size(); }
+	[[nodiscard]] auto& BooksBorrowed() const { return m_loanSet; }
+	[[nodiscard]] auto& ReservationList() const { return m_reservationSet; }
 
 	void borrowBook(Book* book) { m_loanSet.insert(book); }
 	void returnBook(Book* book) { m_loanSet.erase(book); }
