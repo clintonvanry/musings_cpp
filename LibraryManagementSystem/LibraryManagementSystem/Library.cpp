@@ -454,7 +454,7 @@ void Library::load()
 	
 	for (const auto customer : m_customerList)
 	{
-		int borrowedListSize = customer->numberOfBooksBorrowed();
+		int borrowedListSize = customer->numberOfBooksBorrowed(); // bug here should get the size from the stream.
 		if (borrowedListSize > 0) 
 		{
 			auto borrowedList = customer->BooksBorrowed(); // TODO memory leak here not sure how to resolve
@@ -500,7 +500,6 @@ void Library::save()
 		return;
 	}
 
-	
 	// write the size of the book list
 	auto bookListSize = m_bookList.size();
 	outStream.write(reinterpret_cast<char*>(&bookListSize), sizeof bookListSize);
@@ -546,10 +545,8 @@ void Library::save()
 	// write the customer specifics
 	for (const auto customer : m_customerList)
 	{
-		
 		auto customerBooksBorrowedSize = customer->numberOfBooksBorrowed();
 		outStream.write(reinterpret_cast<char*>(&customerBooksBorrowedSize), sizeof customerBooksBorrowedSize);
-
 		if (customerBooksBorrowedSize > 0) 
 		{
 			const auto& customerBooksBorrowed = customer->BooksBorrowed();
@@ -560,10 +557,8 @@ void Library::save()
 			}
 		}
 		
-		
 		auto bookReservationListSize = customer->numberOfBooksReserved();
 		outStream.write(reinterpret_cast<char*>(&bookReservationListSize), sizeof bookReservationListSize);
-
 		if (bookReservationListSize > 0) 
 		{
 			const auto& bookReservationList = customer->ReservationList();
