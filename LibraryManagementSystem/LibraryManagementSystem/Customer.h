@@ -27,6 +27,7 @@ public:
 	[[nodiscard]] std::string Address() const { return  m_address; }
 	[[nodiscard]] auto hasBorrowed() const { return !m_loanSet.empty(); }
 	[[nodiscard]] auto numberOfBooksBorrowed() const { return m_loanSet.size(); }
+	[[nodiscard]] auto numberOfBooksReserved() const { return m_reservationSet.size(); }
 	[[nodiscard]] auto& BooksBorrowed() const { return m_loanSet; }
 	[[nodiscard]] auto& ReservationList() const { return m_reservationSet; }
 

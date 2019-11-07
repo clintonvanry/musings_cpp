@@ -472,13 +472,12 @@ void Library::load()
 			}
 		}
 		
-		
 		// reservations
-		auto reservations = customer->ReservationList();
-		int reservationSize = reservations.size();
-		inStream.read(reinterpret_cast<char*>(&reservationSize), sizeof reservationSize);
+		int reservationSize = customer->numberOfBooksReserved();
 		if (reservationSize > 0)
 		{
+			inStream.read(reinterpret_cast<char*>(&reservationSize), sizeof reservationSize);
+			auto reservations = customer->ReservationList();
 			for (auto i = 0; i < reservationSize; ++i)
 			{
 				auto reservationBookIndex = 0;
@@ -561,12 +560,13 @@ void Library::save()
 			}
 		}
 		
-		const auto& bookReservationList = customer->ReservationList();
-		auto bookReservationListSize = bookReservationList.size();
+		
+		auto bookReservationListSize = customer->numberOfBooksReserved();
 		outStream.write(reinterpret_cast<char*>(&bookReservationListSize), sizeof bookReservationListSize);
 
 		if (bookReservationListSize > 0) 
 		{
+			const auto& bookReservationList = customer->ReservationList();
 			for (const auto bookToBeReserved : bookReservationList)
 			{
 				auto bookReservationIndex = lookupBookIndex(bookToBeReserved);
