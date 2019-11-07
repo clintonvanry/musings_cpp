@@ -4,6 +4,7 @@
 #include "Customer.h"
 
 using namespace std;
+
 Library::~Library()
 {
 	for (auto book : m_bookList)
