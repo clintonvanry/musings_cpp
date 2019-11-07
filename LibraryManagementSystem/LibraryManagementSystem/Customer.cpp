@@ -12,7 +12,9 @@ Customer::Customer()
 
 Customer::~Customer()
 {
+	cleanup();
 	cout << "~Customer()" << endl;
+	
 }
 
 Customer::Customer(std::string name, std::string address) : m_name(std::move(name)), m_address(std::move(address))
@@ -73,4 +75,14 @@ void Customer::write(std::ofstream& outStream) const
 {
 	outStream << m_name << endl;
 	outStream << m_address << endl;
+}
+
+void Customer::cleanup() noexcept
+{
+	cout << "cleanup()" << endl;
+	m_name = "";
+	m_address = "";
+	m_loanSet.clear();
+	m_reservationSet.clear();
+	
 }

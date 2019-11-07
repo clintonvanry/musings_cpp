@@ -48,11 +48,11 @@ private:
 	void load();
 	void save();
 
-	auto lookupBookIndex(const Book* bookPtr);
-	auto lookupCustomerIndex(const Customer* customerPtr);
+	int lookupBookIndex(const Book* bookPtr);
+	int lookupCustomerIndex(const Customer* customerPtr);
 
-	auto lookupBookPtr(int bookIndex);
-	auto lookupCustomerPtr(int customerIndex);
+	Book* lookupBookPtr(int bookIndex);
+	Customer* lookupCustomerPtr(int customerIndex);
 
 };
 

@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Book.h"
 #include "Customer.h"
+#include <fstream>
 
 using namespace std;
 
@@ -24,6 +25,7 @@ Library::~Library()
 
 void Library::run()
 {
+	load();
 	auto quit = false;
 	while (!quit)
 	{
@@ -91,6 +93,8 @@ void Library::run()
 
 		cout << endl;
 	}
+
+	save();
 }
 
 void Library::getBookDetails(std::string& author, std::string& title) const
@@ -392,7 +396,7 @@ void Library::reserveBook()
 
 void Library::load()
 {
-	/*
+	
 	ifstream inStream(s_binaryPath);
 
 	if (!inStream)
@@ -422,13 +426,12 @@ void Library::load()
 	for (const auto book : m_bookList)
 	{
 		auto bookIsBorrowed = false;
-		inStream.read(reinterpret_cast<char*>(bookIsBorrowed), sizeof bookIsBorrowed);
+		inStream.read(reinterpret_cast<char*>(&bookIsBorrowed), sizeof bookIsBorrowed);
 		if (bookIsBorrowed)
 		{
 			auto borrowedBookIndex = 0;
 			inStream.read(reinterpret_cast<char*>(&borrowedBookIndex), sizeof borrowedBookIndex);
-			// TODO how to get the pointer out
-			book->borrowBook(reinterpret_cast<Customer*>(lookupCustomerPtr(borrowedBookIndex)));
+			book->borrowBook(lookupCustomerPtr(borrowedBookIndex));
 
 			// reservationlist
 			auto reservationList = book->ReservationList();
@@ -441,7 +444,7 @@ void Library::load()
 				{
 					auto reserverationCustIndex = 0;
 					inStream.read(reinterpret_cast<char*>(&reserverationCustIndex), sizeof reserverationCustIndex);
-					auto reservationCustomer = reinterpret_cast<Customer*>(lookupCustomerPtr(reserverationCustIndex));
+					auto reservationCustomer = lookupCustomerPtr(reserverationCustIndex);
 					reservationList.push_back(reservationCustomer);
 				}
 			}
@@ -450,7 +453,7 @@ void Library::load()
 
 	for (const auto customer : m_customerList)
 	{
-		auto borrowedList = customer->BooksBorrowed();
+		auto borrowedList = customer->BooksBorrowed(); // TODO memory leak here not sure how to resolve
 		int borrowedListSize = borrowedList.size();
 		inStream.read(reinterpret_cast<char*>(&borrowedList), sizeof borrowedListSize);
 		if (borrowedListSize > 0)
@@ -460,7 +463,7 @@ void Library::load()
 				auto bookIndex = 0;
 				inStream.read(reinterpret_cast<char*>(&bookIndex), sizeof bookIndex);
 
-				auto book = reinterpret_cast<Book*>(lookupBookPtr(bookIndex));
+				auto book = lookupBookPtr(bookIndex);
 				borrowedList.insert(book);
 			}
 		}
@@ -474,17 +477,17 @@ void Library::load()
 			{
 				auto reservationBookIndex = 0;
 				inStream.read(reinterpret_cast<char*>(&reservationBookIndex), sizeof reservationBookIndex);
-				auto book = reinterpret_cast<Book*>(lookupBookPtr(reservationBookIndex));
+				auto book =lookupBookPtr(reservationBookIndex);
 				reservations.insert(book);
 			}
 		}
 	}
-	*/
+	
 }
 
 void Library::save()
 {
-	/*
+	
 	ofstream outStream(s_binaryPath);
 	if (!outStream)
 	{
@@ -492,6 +495,7 @@ void Library::save()
 		return;
 	}
 
+	
 	// write the size of the book list
 	auto bookListSize = m_bookList.size();
 	outStream.write(reinterpret_cast<char*>(&bookListSize), sizeof bookListSize);
@@ -515,11 +519,11 @@ void Library::save()
 	{
 		// store the index of the customer who borrowed the book if it is borrowed.
 		auto bookIsBorrowed = book->borrowed();
-		outStream.write(reinterpret_cast<char*>(bookIsBorrowed), sizeof bookIsBorrowed);
+		outStream.write(reinterpret_cast<char*>(&bookIsBorrowed), sizeof bookIsBorrowed);
 		if (bookIsBorrowed) // write the index of the customer
 		{
 			auto customerIndex = lookupCustomerIndex(book->customer());
-			outStream.write(reinterpret_cast<char*>(customerIndex), sizeof customerIndex);
+			outStream.write(reinterpret_cast<char*>(&customerIndex), sizeof customerIndex);
 		}
 
 		// store the size of the reservation for the book
@@ -530,7 +534,7 @@ void Library::save()
 		{
 			// write the index
 			auto customerReservationIndex = lookupCustomerIndex(customer);
-			outStream.write(reinterpret_cast<char*>(customerReservationIndex), sizeof customerReservationIndex);
+			outStream.write(reinterpret_cast<char*>(&customerReservationIndex), sizeof customerReservationIndex);
 		}
 	}
 
@@ -558,10 +562,10 @@ void Library::save()
 		}
 
 	}
-	*/
+	
 }
 
-auto Library::lookupCustomerPtr(int customerIndex)
+Customer* Library::lookupCustomerPtr(int customerIndex)
 {
 	auto customerInterator = m_customerList.begin();
 
@@ -572,7 +576,7 @@ auto Library::lookupCustomerPtr(int customerIndex)
 	return *customerInterator;
 }
 
-auto Library::lookupBookPtr(int bookIndex)
+Book* Library::lookupBookPtr(int bookIndex)
 {
 	auto bookInterator = m_bookList.begin(); // read up on this one
 
@@ -583,7 +587,7 @@ auto Library::lookupBookPtr(int bookIndex)
 	return *bookInterator;
 }
 
-auto Library::lookupCustomerIndex(const Customer* customerPtr)
+int Library::lookupCustomerIndex(const Customer* customerPtr)
 {
 	auto index = 0;
 	for (const auto customer : m_customerList)
@@ -597,7 +601,7 @@ auto Library::lookupCustomerIndex(const Customer* customerPtr)
 	return -1;
 }
 
-auto Library::lookupBookIndex(const Book* bookPtr)
+int Library::lookupBookIndex(const Book* bookPtr)
 {
 	auto index = 0;
 	for (const auto book : m_bookList)

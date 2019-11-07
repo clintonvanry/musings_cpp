@@ -41,5 +41,7 @@ public:
 private:
 	std::string m_name, m_address;
 	std::set<Book*> m_loanSet, m_reservationSet;
+
+	void cleanup() noexcept;
 };
 
