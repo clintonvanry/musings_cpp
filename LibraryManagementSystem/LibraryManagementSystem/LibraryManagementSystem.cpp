@@ -10,7 +10,8 @@ int main()
 {
 	cout << "starting...!\n" << endl;
 
-	Library();
+	Library lib;
+	lib.run();
 	
 	return 0;
 }

@@ -2,70 +2,53 @@
 #include <string>
 #include <list>
 
-
-using namespace  std;
-
 class Customer;
 
 class Book
 {
-	string m_author;
-	string m_title;
-	Customer* m_customer = nullptr;
-	list<Customer*> m_reservationList;
-	bool m_bookIsBorrowed = false;
-	
 public:
-	
-	// constructor
-	Book() = default;
-	virtual ~Book() = default;
-	Book(string author, string title);
+	// constructors
+	Book(); // default
+	Book(std::string title, std::string author); // user defined
 
-	// disallow assignment and pass by value
-	Book(const Book& src) = delete;
-	Book& operator=(const Book& rhs) = delete;
+	// deconstructor
+	virtual ~Book();
 
-	// explicit default move constructor and assignment
-	Book(Book&& src) = default;
-	Book& operator=(Book&& rhs) = default;
-	
-	// methods
-	void read(ifstream& inStream);
-	void write(ofstream& outStream) const;
+	//copy constructor
+	Book(const Book& src);
+	// assignment operator
+	Book& operator=(const Book& rhs);
 
+
+	// move semantics
+	Book(Book&& src) noexcept; // move constructor
+	Book& operator=(Book&& rhs) noexcept; // move assign
+
+	friend void swap(Book& first, Book& second) noexcept; // copy and swap idiom
+	friend std::ostream& operator<<(std::ostream& outStream, const Book* book);
+
+	[[nodiscard]] auto Title() const { return m_title; }
+	[[nodiscard]] auto Author() const { return m_author; }
+	[[nodiscard]] auto borrowed() const { return m_bookIsBorrowed; }
+	[[nodiscard]] Customer* customer() const { return m_customer; }
+	[[nodiscard]] auto& ReservationList() const { return m_reservationList; }
+
+	void returnBook();
 	void borrowBook(Customer* customer);
 	int reserveBook(Customer* customer);
 	void unreserveBook(Customer* customer);
-	void returnBook();
 
-	
-	
-	[[nodiscard]] auto borrowed() const
-	{
-		return m_bookIsBorrowed;
-	}
+	void read(std::ifstream& inStream);
+	void write(std::ofstream& outStream) const;
 
-	[[nodiscard]] Customer* customer() const
-	{
-		return m_customer;
-	}
+private:
+	std::string m_title, m_author;
+	bool m_bookIsBorrowed = false;
+	Customer* m_customer = nullptr;
+	std::list<Customer*> m_reservationList;
 
-	[[nodiscard]] auto Author() const
-	{
-		return m_author;
-	}
+	void cleanup() noexcept;
 
-	[[nodiscard]] auto Title() const
-	{
-		return m_title;
-	}
 
-	[[nodiscard]] auto& ReservationList() const 
-	{
-		return m_reservationList;
-	}
-
-	friend ostream& operator<<(ostream& outStream, const Book* book);
 };
 
