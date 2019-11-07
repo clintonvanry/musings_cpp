@@ -22,6 +22,7 @@ public:
 	void run();
 
 private:
+	inline static const std::string s_binaryPath = ".\\Debug\\Library.binary"; // dont know why ths does not work {R"(C:\Users\Marius\Documents\)"s};
 	std::list<Book*> m_bookList;
 	std::list<Customer*> m_customerList;
 
