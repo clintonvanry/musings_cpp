@@ -81,7 +81,7 @@ void swap(Book& first, Book& second) noexcept
 	std::swap(first.m_reservationList, second.m_reservationList);
 }
 
-std::ostream& operator<<(std::ostream& outStream, const Book* book)
+std::ostream& operator<<(std::ostream& outStream, const std::shared_ptr<Book>& book)
 {
 	if (book == nullptr)
 	{

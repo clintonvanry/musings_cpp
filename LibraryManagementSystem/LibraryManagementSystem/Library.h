@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <list>
+#include <memory>
 
 class Book;
 class Customer;
@@ -23,11 +24,11 @@ public:
 
 private:
 	inline static const std::string s_binaryPath = ".\\Debug\\Library.binary"; // dont know why ths does not work {R"(C:\Users\Marius\Documents\)"s};
-	std::list<Book*> m_bookList;
+	std::list<std::shared_ptr<Book>> m_bookList;
 	std::list<Customer*> m_customerList;
 
 	void getBookDetails(std::string& author, std::string& title) const;
-	Book* lookupBook(std::string_view author, std::string_view title);
+	std::shared_ptr<Book> lookupBook(std::string_view author, std::string_view title);
 
 	void addBook();
 	void deleteBook();
@@ -51,7 +52,7 @@ private:
 	int lookupBookIndex(const Book* bookPtr);
 	int lookupCustomerIndex(const Customer* customerPtr);
 
-	Book* lookupBookPtr(int bookIndex);
+	std::shared_ptr<Book>& lookupBookPtr(int bookIndex);
 	Customer* lookupCustomerPtr(int customerIndex);
 
 };

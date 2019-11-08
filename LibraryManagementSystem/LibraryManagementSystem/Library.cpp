@@ -10,8 +10,7 @@ Library::~Library()
 {
 	for (auto book : m_bookList)
 	{
-		delete book;
-		book = nullptr;
+		book.reset();
 	}
 	m_bookList.clear();
 
@@ -25,7 +24,7 @@ Library::~Library()
 
 void Library::run()
 {
-	load();
+	//load();
 	auto quit = false;
 	while (!quit)
 	{
@@ -94,7 +93,7 @@ void Library::run()
 		cout << endl;
 	}
 
-	save();
+	//save();
 }
 
 void Library::getBookDetails(std::string& author, std::string& title) const
@@ -117,7 +116,7 @@ void Library::getCustomerDetails(std::string& name, std::string& address) const
 
 
 
-Book* Library::lookupBook(std::string_view author, std::string_view title)
+std::shared_ptr<Book> Library::lookupBook(std::string_view author, std::string_view title)
 {
 	for (auto book : m_bookList)
 	{
@@ -127,7 +126,7 @@ Book* Library::lookupBook(std::string_view author, std::string_view title)
 		}
 	}
 
-	return nullptr;
+	return shared_ptr<Book>(nullptr);
 }
 
 Customer* Library::lookupCustomer(std::string_view name, std::string_view address)
@@ -156,9 +155,9 @@ void Library::addBook()
 		return;
 	}
 
-	auto book = new Book(title, author); // should this not be deleted near the end. adding to the list is likely a copy?
-	cout << endl << "Added: " << book << endl;
-	m_bookList.push_back(book);
+	auto book = make_shared<Book>(title, author );
+	cout << endl << "Added: " <<  std::const_pointer_cast<Book>(book) << endl;
+	m_bookList.push_back(std::move(book));
 
 }
 
@@ -190,7 +189,7 @@ void Library::listBooks()
 		return;
 	}
 
-	for (const auto book : m_bookList)
+	for (const auto& book : m_bookList)
 	{
 		cout << book << endl;
 	}
@@ -211,7 +210,7 @@ void Library::listCustomer()
 
 void Library::deleteBook()
 {
-
+	/*
 	string author, title;
 	getBookDetails(author, title);
 
@@ -240,6 +239,7 @@ void Library::deleteBook()
 	cout << endl << "Deleted book" << bookFromLibrary << endl;
 	m_bookList.remove(bookFromLibrary);
 	delete bookFromLibrary;
+	*/
 }
 
 void Library::deleteCustomer()
@@ -275,6 +275,7 @@ void Library::deleteCustomer()
 
 void Library::borrowBook()
 {
+	/*
 	cout << "Please enter book details" << endl;
 	string author, title;
 	getBookDetails(author, title);
@@ -306,11 +307,12 @@ void Library::borrowBook()
 
 	bookFromLibrary->borrowBook(customerFromLibrary);
 	customerFromLibrary->borrowBook(bookFromLibrary);
-
+	*/
 }
 
 void Library::returnBook()
 {
+	/*
 	cout << "Please enter book details" << endl;
 	string author, title;
 	getBookDetails(author, title);
@@ -348,11 +350,12 @@ void Library::returnBook()
 		cout << endl << "Book:" << bookFromLibrary << endl << "Borrowed by: " << newCustomer->Name() << endl;
 
 	}
-
+	*/
 }
 
 void Library::reserveBook()
 {
+	/*
 	cout << "Please enter book details" << endl;
 	string author, title;
 	getBookDetails(author, title);
@@ -392,11 +395,12 @@ void Library::reserveBook()
 	auto position = bookFromLibrary->reserveBook(customerFromLibrary);
 
 	cout << endl << "Book reservation position " << position << "nd reserved." << endl;
+	*/
 }
 
 void Library::load()
 {
-	
+	/*
 	ifstream inStream(s_binaryPath);
 
 	if (!inStream)
@@ -487,12 +491,13 @@ void Library::load()
 			}
 		}
 	}
+	*/
 	
 }
 
 void Library::save()
 {
-	
+	/*
 	ofstream outStream(s_binaryPath);
 	if (!outStream)
 	{
@@ -570,7 +575,7 @@ void Library::save()
 		}
 
 	}
-	
+	*/
 }
 
 Customer* Library::lookupCustomerPtr(int customerIndex)
@@ -584,7 +589,7 @@ Customer* Library::lookupCustomerPtr(int customerIndex)
 	return *customerInterator;
 }
 
-Book* Library::lookupBookPtr(int bookIndex)
+std::shared_ptr<Book>& Library::lookupBookPtr(int bookIndex)
 {
 	auto bookInterator = m_bookList.begin(); // read up on this one
 
@@ -611,6 +616,7 @@ int Library::lookupCustomerIndex(const Customer* customerPtr)
 
 int Library::lookupBookIndex(const Book* bookPtr)
 {
+	/*
 	auto index = 0;
 	for (const auto book : m_bookList)
 	{
@@ -620,5 +626,7 @@ int Library::lookupBookIndex(const Book* bookPtr)
 		}
 		index++;
 	}
+	return -1;
+	*/
 	return -1;
 }

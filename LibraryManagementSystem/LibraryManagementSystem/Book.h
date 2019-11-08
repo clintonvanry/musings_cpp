@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <list>
+#include <memory>
 
 class Customer;
 
@@ -25,7 +26,7 @@ public:
 	Book& operator=(Book&& rhs) noexcept; // move assign
 
 	friend void swap(Book& first, Book& second) noexcept; // copy and swap idiom
-	friend std::ostream& operator<<(std::ostream& outStream, const Book* book);
+	friend std::ostream& operator<<(std::ostream& outStream, const std::shared_ptr<Book>& book);
 
 	[[nodiscard]] auto Title() const { return m_title; }
 	[[nodiscard]] auto Author() const { return m_author; }
