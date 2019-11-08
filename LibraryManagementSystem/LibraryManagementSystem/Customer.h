@@ -2,6 +2,7 @@
 #include <string>
 #include "Book.h"
 #include <set>
+#include <vector>
 
 class Customer
 {
@@ -31,8 +32,11 @@ public:
 	[[nodiscard]] auto& BooksBorrowed() const { return m_loanSet; }
 	[[nodiscard]] auto& ReservationList() const { return m_reservationSet; }
 
-	void borrowBook(std::shared_ptr<Book> book) { m_loanSet.insert(book); }
-	void returnBook(const std::shared_ptr<Book>& book) { m_loanSet.erase(book); }
+	void borrowBook(std::weak_ptr<Book> book)
+	{
+		m_loanSet.push_back(book);
+	}
+	//void returnBook(const std::shared_ptr<Book>& book) { m_loanSet.erase(book); }
 
 	void unreserveBook(const std::shared_ptr<Book>& book) { m_reservationSet.erase(book); }
 	void reserveBook(const std::shared_ptr<Book>& book) { m_reservationSet.insert(book); }
@@ -42,7 +46,8 @@ public:
 
 private:
 	std::string m_name, m_address;
-	std::set<std::shared_ptr<Book>> m_loanSet, m_reservationSet;
+	std::vector<std::weak_ptr<Book>> m_loanSet;
+	std::set<std::shared_ptr<Book>> m_reservationSet;
 
 	void cleanup() noexcept;
 };

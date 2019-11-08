@@ -31,20 +31,24 @@ std::ostream& operator<<(std::ostream& outStream, const std::shared_ptr<Customer
 	}
 
 	outStream << " \"" << customer->Name() << "\" address: " << customer->Address();
-
+	
 	auto booksBorrowed = customer->BooksBorrowed();
 	if (!booksBorrowed.empty())
 	{
 		outStream << endl << "  Borrowed books: ";
-
+		
 		auto first = true;
-		for (const auto book : booksBorrowed)
+		for (auto& book : booksBorrowed)
 		{
-			outStream << (first ? "" : ",") << book->Author();
-			first = false;
+			if (const std::shared_ptr<Book> bookPtr = book.lock()) 
+			{
+				outStream << (first ? "" : ",") << bookPtr->Author(); // TODO neat up
+				first = false;
+			}
 		}
+		
 	}
-
+    
 	auto reservationList = customer->ReservationList();
 	if (!reservationList.empty())
 	{
