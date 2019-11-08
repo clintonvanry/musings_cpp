@@ -13,6 +13,7 @@ Customer::Customer()
 Customer::~Customer()
 {
 	cleanup();
+	
 	cout << "~Customer()" << endl;
 	
 }
