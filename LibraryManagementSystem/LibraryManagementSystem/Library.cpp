@@ -8,17 +8,7 @@ using namespace std;
 
 Library::~Library()
 {
-	for (auto book : m_bookList)
-	{
-		book.reset();
-	}
 	m_bookList.clear();
-
-	for (auto customer : m_customerList)
-	{
-		delete customer;
-		customer = nullptr;
-	}
 	m_customerList.clear();
 }
 
@@ -129,7 +119,7 @@ std::shared_ptr<Book> Library::lookupBook(std::string_view author, std::string_v
 	return shared_ptr<Book>(nullptr);
 }
 
-Customer* Library::lookupCustomer(std::string_view name, std::string_view address)
+std::shared_ptr<Customer> Library::lookupCustomer(std::string_view name, std::string_view address)
 {
 	for (auto customer : m_customerList)
 	{
@@ -139,7 +129,7 @@ Customer* Library::lookupCustomer(std::string_view name, std::string_view addres
 		}
 	}
 
-	return nullptr;
+	return shared_ptr<Customer>(nullptr);
 }
 
 
@@ -173,8 +163,8 @@ void Library::addCustomer()
 		return;
 	}
 
-	auto customer = new Customer(name, address);
-	cout << endl << "Added " << customer << endl;
+	auto customer = std::make_shared<Customer>( name, address);
+	cout << endl << "Added " << std::const_pointer_cast<Customer>(customer) << endl;
 	m_customerList.push_back(customer);
 }
 
@@ -191,7 +181,7 @@ void Library::listBooks()
 
 	for (const auto& book : m_bookList)
 	{
-		cout << book << endl;
+		cout << std::const_pointer_cast<Book>(book) << endl;
 	}
 }
 void Library::listCustomer()
@@ -202,7 +192,7 @@ void Library::listCustomer()
 		return;
 	}
 
-	for (const auto customer : m_customerList)
+	for (const auto& customer : m_customerList)
 	{
 		cout << customer << endl;
 	}
@@ -244,6 +234,7 @@ void Library::deleteBook()
 
 void Library::deleteCustomer()
 {
+	/*
 	string name, address;
 	getCustomerDetails(name, address);
 
@@ -269,7 +260,7 @@ void Library::deleteCustomer()
 	m_customerList.remove(customerFromLibrary);
 	cout << endl << "Deleted customer" << customerFromLibrary << endl;
 	delete customerFromLibrary;
-
+	*/
 }
 
 
@@ -578,7 +569,7 @@ void Library::save()
 	*/
 }
 
-Customer* Library::lookupCustomerPtr(int customerIndex)
+std::shared_ptr<Customer>& Library::lookupCustomerPtr(int customerIndex)
 {
 	auto customerInterator = m_customerList.begin();
 
@@ -602,6 +593,7 @@ std::shared_ptr<Book>& Library::lookupBookPtr(int bookIndex)
 
 int Library::lookupCustomerIndex(const Customer* customerPtr)
 {
+	/*
 	auto index = 0;
 	for (const auto customer : m_customerList)
 	{
@@ -611,6 +603,7 @@ int Library::lookupCustomerIndex(const Customer* customerPtr)
 		}
 		index++;
 	}
+	*/
 	return -1;
 }
 

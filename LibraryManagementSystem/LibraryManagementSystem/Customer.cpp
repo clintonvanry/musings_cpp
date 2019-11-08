@@ -23,7 +23,7 @@ Customer::Customer(std::string name, std::string address) : m_name(std::move(nam
 	cout << "Customer(std::string name, std::string address)" << endl;
 }
 
-std::ostream& operator<<(std::ostream& outStream, const Customer* customer)
+std::ostream& operator<<(std::ostream& outStream, const std::shared_ptr<Customer>& customer)
 {
 	if (customer == nullptr)
 	{

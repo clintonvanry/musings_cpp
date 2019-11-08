@@ -21,7 +21,7 @@ public:
 	Customer(Customer&& src) = default;
 	Customer& operator=(Customer&& rhs) = default;
 
-	friend std::ostream& operator<<(std::ostream& outStream, const Customer* customer);
+	friend std::ostream& operator<<(std::ostream& outStream, const std::shared_ptr<Customer>& customer);
 
 	[[nodiscard]] std::string Name() const { return  m_name; }
 	[[nodiscard]] std::string Address() const { return  m_address; }
