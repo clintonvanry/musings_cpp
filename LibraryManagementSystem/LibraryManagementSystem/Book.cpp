@@ -66,7 +66,10 @@ void Book::cleanup() noexcept
 	m_title = "";
 	m_author = "";
 
-	m_customer = nullptr;
+	if (m_customer) 
+	{
+		m_customer.reset();
+	}
 	m_reservationList.clear();
 
 }
@@ -102,7 +105,7 @@ std::ostream& operator<<(std::ostream& outStream, const std::shared_ptr<Book>& b
 		outStream << endl << "  Reserved by: ";
 
 		auto first = true;
-		for (const auto customer : reservationList)
+		for (const auto& customer : reservationList)
 		{
 			outStream << (first ? "" : ",") << "" << customer->Name();
 			first = false;
@@ -121,7 +124,7 @@ void Book::returnBook()
 	m_customer = nullptr;
 }
 
-void Book::borrowBook(std::shared_ptr<Customer>& customer)
+void Book::borrowBook(std::shared_ptr<Customer> customer)
 {
 	m_bookIsBorrowed = true;
 	m_customer = customer;

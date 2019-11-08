@@ -25,8 +25,8 @@ public:
 private:
 	inline static const std::string s_binaryPath = ".\\Debug\\Library.binary"; // dont know why ths does not work {R"(C:\Users\Marius\Documents\)"s};
 	std::list<std::shared_ptr<Book>> m_bookList;
-	std::list< std::shared_ptr<Customer>> m_customerList;
-
+	std::list<std::shared_ptr<Customer>> m_customerList;
+	
 	void getBookDetails(std::string& author, std::string& title) const;
 	std::shared_ptr<Book> lookupBook(std::string_view author, std::string_view title);
 

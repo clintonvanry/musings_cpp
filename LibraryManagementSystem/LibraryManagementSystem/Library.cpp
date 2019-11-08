@@ -108,7 +108,7 @@ void Library::getCustomerDetails(std::string& name, std::string& address) const
 
 std::shared_ptr<Book> Library::lookupBook(std::string_view author, std::string_view title)
 {
-	for (auto book : m_bookList)
+	for (auto& book : m_bookList)
 	{
 		if (book->Author() == author && book->Title() == title)
 		{
@@ -165,7 +165,9 @@ void Library::addCustomer()
 
 	auto customer = std::make_shared<Customer>( name, address);
 	cout << endl << "Added " << std::const_pointer_cast<Customer>(customer) << endl;
-	m_customerList.push_back(customer);
+	m_customerList.push_back(std::move(customer));
+	
+	
 }
 
 
@@ -266,7 +268,7 @@ void Library::deleteCustomer()
 
 void Library::borrowBook()
 {
-	/*
+	
 	cout << "Please enter book details" << endl;
 	string author, title;
 	getBookDetails(author, title);
@@ -298,7 +300,10 @@ void Library::borrowBook()
 
 	bookFromLibrary->borrowBook(customerFromLibrary);
 	customerFromLibrary->borrowBook(bookFromLibrary);
-	*/
+
+	bookFromLibrary.reset();
+	customerFromLibrary.reset();
+	
 }
 
 void Library::returnBook()

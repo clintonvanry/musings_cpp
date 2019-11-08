@@ -31,7 +31,7 @@ public:
 	[[nodiscard]] auto& BooksBorrowed() const { return m_loanSet; }
 	[[nodiscard]] auto& ReservationList() const { return m_reservationSet; }
 
-	void borrowBook(const std::shared_ptr<Book>& book) { m_loanSet.insert(book); }
+	void borrowBook(std::shared_ptr<Book> book) { m_loanSet.insert(book); }
 	void returnBook(const std::shared_ptr<Book>& book) { m_loanSet.erase(book); }
 
 	void unreserveBook(const std::shared_ptr<Book>& book) { m_reservationSet.erase(book); }
