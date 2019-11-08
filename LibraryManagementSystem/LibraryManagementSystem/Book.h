@@ -31,13 +31,13 @@ public:
 	[[nodiscard]] auto Title() const { return m_title; }
 	[[nodiscard]] auto Author() const { return m_author; }
 	[[nodiscard]] auto borrowed() const { return m_bookIsBorrowed; }
-	[[nodiscard]] Customer* customer() const { return m_customer; }
+	[[nodiscard]] std::shared_ptr<Customer> customer() const { return m_customer; }
 	[[nodiscard]] auto& ReservationList() const { return m_reservationList; }
 
 	void returnBook();
-	void borrowBook(Customer* customer);
-	int reserveBook(Customer* customer);
-	void unreserveBook(Customer* customer);
+	void borrowBook(std::shared_ptr<Customer>& customer);
+	int reserveBook(const std::shared_ptr<Customer>& customer);
+	void unreserveBook(const std::shared_ptr<Customer>& customer);
 
 	void read(std::ifstream& inStream);
 	void write(std::ofstream& outStream) const;
@@ -45,8 +45,8 @@ public:
 private:
 	std::string m_title, m_author;
 	bool m_bookIsBorrowed = false;
-	Customer* m_customer = nullptr;
-	std::list<Customer*> m_reservationList;
+	std::shared_ptr<Customer> m_customer = nullptr;
+	std::list<std::shared_ptr<Customer>> m_reservationList;
 
 	void cleanup() noexcept;
 

@@ -31,18 +31,18 @@ public:
 	[[nodiscard]] auto& BooksBorrowed() const { return m_loanSet; }
 	[[nodiscard]] auto& ReservationList() const { return m_reservationSet; }
 
-	void borrowBook(Book* book) { m_loanSet.insert(book); }
-	void returnBook(Book* book) { m_loanSet.erase(book); }
+	void borrowBook(const std::shared_ptr<Book>& book) { m_loanSet.insert(book); }
+	void returnBook(const std::shared_ptr<Book>& book) { m_loanSet.erase(book); }
 
-	void unreserveBook(Book* book) { m_reservationSet.erase(book); }
-	void reserveBook(Book* book) { m_reservationSet.insert(book); }
+	void unreserveBook(const std::shared_ptr<Book>& book) { m_reservationSet.erase(book); }
+	void reserveBook(const std::shared_ptr<Book>& book) { m_reservationSet.insert(book); }
 
 	void read(std::ifstream& inStream);
 	void write(std::ofstream& outStream) const;
 
 private:
 	std::string m_name, m_address;
-	std::set<Book*> m_loanSet, m_reservationSet;
+	std::set<std::shared_ptr<Book>> m_loanSet, m_reservationSet;
 
 	void cleanup() noexcept;
 };

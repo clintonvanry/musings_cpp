@@ -121,19 +121,19 @@ void Book::returnBook()
 	m_customer = nullptr;
 }
 
-void Book::borrowBook(Customer* customer)
+void Book::borrowBook(std::shared_ptr<Customer>& customer)
 {
 	m_bookIsBorrowed = true;
 	m_customer = customer;
 }
 
-int Book::reserveBook(Customer* customer)
+int Book::reserveBook(const std::shared_ptr<Customer>& customer)
 {
 	m_reservationList.push_back(customer);
 	return  m_reservationList.size();
 }
 
-void Book::unreserveBook(Customer* customer)
+void Book::unreserveBook(const std::shared_ptr<Customer>& customer)
 {
 	m_reservationList.remove(customer);
 }
