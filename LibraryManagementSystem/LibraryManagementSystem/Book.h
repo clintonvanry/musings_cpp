@@ -35,7 +35,7 @@ public:
 	[[nodiscard]] auto& ReservationList() const { return m_reservationList; }
 
 	void returnBook();
-	void borrowBook(std::shared_ptr<Customer> customer);
+	void borrowBook(std::shared_ptr<Customer>& customer);
 	int reserveBook(const std::shared_ptr<Customer>& customer);
 	void unreserveBook(const std::shared_ptr<Customer>& customer);
 

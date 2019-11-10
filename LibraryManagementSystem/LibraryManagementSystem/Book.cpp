@@ -124,7 +124,7 @@ void Book::returnBook()
 	m_customer = nullptr;
 }
 
-void Book::borrowBook(std::shared_ptr<Customer> customer)
+void Book::borrowBook(std::shared_ptr<Customer>& customer)
 {
 	m_bookIsBorrowed = true;
 	m_customer = customer;
