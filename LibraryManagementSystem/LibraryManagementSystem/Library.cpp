@@ -299,7 +299,6 @@ void Library::borrowBook()
 
 	bookFromLibrary->borrowBook(customerFromLibrary);
 	customerFromLibrary->borrowBook(bookFromLibrary);
-
 	
 }
 

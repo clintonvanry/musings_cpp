@@ -31,7 +31,7 @@ public:
 	[[nodiscard]] auto Title() const { return m_title; }
 	[[nodiscard]] auto Author() const { return m_author; }
 	[[nodiscard]] auto borrowed() const { return m_bookIsBorrowed; }
-	[[nodiscard]] std::shared_ptr<Customer> customer() const { return m_customer; }
+	[[nodiscard]] auto customer() const { return m_customer; }
 	[[nodiscard]] auto& ReservationList() const { return m_reservationList; }
 
 	void returnBook();
