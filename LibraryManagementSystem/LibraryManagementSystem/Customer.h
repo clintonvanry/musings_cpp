@@ -36,7 +36,18 @@ public:
 	{
 		m_loanSet.push_back(book);
 	}
-	//void returnBook(const std::shared_ptr<Book>& book) { m_loanSet.erase(book); }
+	void returnBook(const std::shared_ptr<Book>& book)
+	{
+		for(auto iter = m_loanSet.begin(); iter != m_loanSet.end(); ++iter)// bug
+		{
+			auto sbook = (*iter).lock();
+			if(sbook == book)
+			{
+				iter = m_loanSet.erase(iter);
+			}
+		}
+		//m_loanSet.erase(book);
+	}
 
 	void unreserveBook(const std::weak_ptr<Book> book)
 	{

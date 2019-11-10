@@ -121,7 +121,7 @@ std::ostream& operator<<(std::ostream& outStream, const std::shared_ptr<Book>& b
 void Book::returnBook()
 {
 	m_bookIsBorrowed = true;
-	m_customer = nullptr;
+	m_customer.reset();
 }
 
 void Book::borrowBook(std::shared_ptr<Customer>& customer)

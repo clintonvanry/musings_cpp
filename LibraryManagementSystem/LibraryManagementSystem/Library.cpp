@@ -304,7 +304,7 @@ void Library::borrowBook()
 
 void Library::returnBook()
 {
-	/*
+	
 	cout << "Please enter book details" << endl;
 	string author, title;
 	getBookDetails(author, title);
@@ -342,7 +342,7 @@ void Library::returnBook()
 		cout << endl << "Book:" << bookFromLibrary << endl << "Borrowed by: " << newCustomer->Name() << endl;
 
 	}
-	*/
+	
 }
 
 void Library::reserveBook()
