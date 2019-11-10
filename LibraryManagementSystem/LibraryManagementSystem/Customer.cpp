@@ -40,7 +40,7 @@ std::ostream& operator<<(std::ostream& outStream, const std::shared_ptr<Customer
 		auto first = true;
 		for (auto& book : booksBorrowed)
 		{
-			if (const std::shared_ptr<Book> bookPtr = book.lock()) 
+			if (const auto bookPtr = book.lock()) 
 			{
 				outStream << (first ? "" : ",") << bookPtr->Author(); // TODO neat up
 				first = false;
@@ -57,8 +57,11 @@ std::ostream& operator<<(std::ostream& outStream, const std::shared_ptr<Customer
 		auto first = true;
 		for (const auto book : reservationList)
 		{
-			outStream << (first ? "" : ",") << book->Title();
-			first = false;
+			if (const auto bookReservation = book.lock()) 
+			{
+				outStream << (first ? "" : ",") << bookReservation->Title();
+				first = false;
+			}
 		}
 	}
 

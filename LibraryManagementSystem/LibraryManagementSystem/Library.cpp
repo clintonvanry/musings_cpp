@@ -347,7 +347,7 @@ void Library::returnBook()
 
 void Library::reserveBook()
 {
-	/*
+	
 	cout << "Please enter book details" << endl;
 	string author, title;
 	getBookDetails(author, title);
@@ -384,10 +384,10 @@ void Library::reserveBook()
 	}
 
 	customerFromLibrary->reserveBook(bookFromLibrary);
-	auto position = bookFromLibrary->reserveBook(customerFromLibrary);
+	const auto position = bookFromLibrary->reserveBook(customerFromLibrary);
 
 	cout << endl << "Book reservation position " << position << "nd reserved." << endl;
-	*/
+	
 }
 
 void Library::load()

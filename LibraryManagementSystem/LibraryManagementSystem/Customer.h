@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 #include "Book.h"
-#include <set>
 #include <vector>
+#include <algorithm>
 
 class Customer
 {
@@ -38,16 +38,23 @@ public:
 	}
 	//void returnBook(const std::shared_ptr<Book>& book) { m_loanSet.erase(book); }
 
-	void unreserveBook(const std::shared_ptr<Book>& book) { m_reservationSet.erase(book); }
-	void reserveBook(const std::shared_ptr<Book>& book) { m_reservationSet.insert(book); }
+	void unreserveBook(const std::weak_ptr<Book> book)
+	{
+		//m_reservationSet.erase(std::remove(m_reservationSet.begin(), m_reservationSet.end(), book), m_reservationSet.end());
+		//m_reservationSet.erase(book);
+	}
+	void reserveBook(const std::weak_ptr<Book> book)
+	{
+		m_reservationSet.push_back(book);
+	}
 
 	void read(std::ifstream& inStream);
 	void write(std::ofstream& outStream) const;
 
 private:
 	std::string m_name, m_address;
-	std::vector<std::weak_ptr<Book>> m_loanSet;
-	std::set<std::shared_ptr<Book>> m_reservationSet;
+	std::vector<std::weak_ptr<Book>> m_loanSet; // note cant use a set with a weakptr
+	std::vector<std::weak_ptr<Book>> m_reservationSet;
 
 	void cleanup() noexcept;
 };
