@@ -38,15 +38,21 @@ public:
 	}
 	void returnBook(const std::shared_ptr<Book>& book)
 	{
-		for(auto iter = m_loanSet.begin(); iter != m_loanSet.end(); ++iter)// bug
+		auto it = m_loanSet.begin();
+		while(it != m_loanSet.end())
 		{
-			auto sbook = (*iter).lock();
-			if(sbook == book)
+			if(auto sbook = (*it).lock())
 			{
-				iter = m_loanSet.erase(iter);
+				if(sbook == book)
+				{
+					it = m_loanSet.erase(it);
+				}
+				else
+				{
+					++it;
+				}
 			}
 		}
-		//m_loanSet.erase(book);
 	}
 
 	void unreserveBook(const std::weak_ptr<Book> book)
